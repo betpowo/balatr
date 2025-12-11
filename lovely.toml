@@ -1,0 +1,45 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# play a fart sound when title explodes
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "replace_card.states.visible = false"
+position = "after"
+payload = "play_sound(BalatrMod.prefix('ultra_fart')); G.ROOM.jiggle = 9999999999"
+match_indent = true
+
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+position = "at"
+match_indent = true
+pattern = "G.GAME.inflation = G.GAME.inflation + 1"
+payload = "G.GAME.inflation = G.GAME.inflation + (G.GAME.modifiers.inflation or 1)"
+
+[[patches]]
+[patches.pattern]
+target = "challenges.lua"
+position = "at"
+match_indent = true
+pattern = "{id = 'inflation'},"
+payload = "{id = 'inflation', value = 1},"
+
+
+# debug
+# [[patches]]
+# [patches.pattern]
+# target = "card.lua"
+# pattern = '''
+# local context_blueprint_card = context.blueprint_card
+# '''
+# position = "after"
+# payload = '''
+# if (self.ability.set == 'Joker') then
+#     print('calculate wasnt overwritten...im here now '..(self.config.key or self.ability.name))
+# end
+# '''
+# match_indent = true

@@ -1,0 +1,15 @@
+{
+    "id": "balatr",
+    "name": "Balatr",
+    "display_name": "Balatr",
+    "author": [
+        "Betopia"
+    ],
+    "description": "Balatr",
+    "prefix": "balatr_______",
+    "main_file": "main.lua",
+    "priority": -999,
+    "badge_colour": "ff3366",
+    "badge_text_colour": "ffffcc",
+    "version": "0.0.0"
+}
