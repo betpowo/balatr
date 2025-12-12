@@ -238,7 +238,7 @@ local jokers = {
 		cost = 1,
 		calculate = function(self, card, context)
 			G.E_MANAGER:add_event(Event({
-				delay = 3,
+				delay = 0.1,
 				blockable = false,
 				func = function()
 					G:delete_run()
@@ -393,22 +393,26 @@ local jokers = {
 					--print(oc.config.card_key)
 					--print(chip_mod)
 
-					SMODS.destroy_cards(oc)
+					--SMODS.destroy_cards(oc)
             	    
+					G.E_MANAGER:add_event(Event({
+						delay = 0.5,
+						blockable = false,
+						func = function()
+							-- this only exists to make a small pause when destroying card
+							return true
+						end
+					}))
 					card.ability.extra.chips = card.ability.extra.chips + chip_mod
 					card.ability.extra.c_c = card.ability.extra.c_c + 1
 
 					return {
 						colour = G.C.UI_CHIPS,
+						remove = true,
 						message = localize { type = 'variable', key = 'a_chips', vars = { chip_mod } },
 					}
 				end
 			end
-			if context.destroying_card and not context.blueprint and not SMODS.is_eternal(context.destroying_card, card) then
-    		    return {
-    		        remove = true
-    		    }
-    		end
 			if context.end_of_round then
 				card.ability.extra.c_c = 0
 			end

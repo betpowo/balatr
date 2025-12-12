@@ -54,7 +54,7 @@ SMODS.Challenge {
 SMODS.process_loc_text(G.localization.misc.v_text, "ch_c_blorb", {
 	key = "ch_c_blorb",
 	name = {
-		'Start with only {C:'..BalatrMod.prefix('blorbs')..'}Blorb{} suit in your deck',
+		'Start with {C:'..BalatrMod.prefix('blorbs')..'}Blorbs{} only {C:inactive}(i cant ban the default suits :<){}'
 	},
 }, 'name')
 local function get_blorbs()
@@ -111,6 +111,7 @@ SMODS.Challenge {
 			{id = 'bl_head'  , type = 'blind'},
 			{id = 'bl_club'  , type = 'blind'},
 			{id = 'bl_window', type = 'blind'},
+			{id = 'bl_'..BalatrMod.prefix('vacuum'), type = 'blind'},
 		}
 	},
 	deck = {
