@@ -18,7 +18,7 @@ target = "card.lua"
 position = "at"
 match_indent = true
 pattern = "G.GAME.inflation = G.GAME.inflation + 1"
-payload = "G.GAME.inflation = G.GAME.inflation + (G.GAME.modifiers.inflation or 1)"
+payload = "G.GAME.inflation = G.GAME.inflation + ((type(G.GAME.modifiers.inflation) == 'number') and G.GAME.modifiers.inflation or 1)"
 
 [[patches]]
 [patches.pattern]
@@ -27,6 +27,60 @@ position = "at"
 match_indent = true
 pattern = "{id = 'inflation'},"
 payload = "{id = 'inflation', value = 1},"
+
+# make consumables unable to be used immediately
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "at"
+match_indent = true
+pattern = '''
+if card.ability.consumeable then --and card:can_use_consumeable(true, true)
+  card.children.buy_and_use_button = UIBox{
+'''
+payload = '''
+if card.ability.consumeable and not card.ability[BalatrMod.prefix('unusable')] then --and card:can_use_consumeable(true, true)
+  card.children.buy_and_use_button = UIBox{
+'''
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "at"
+match_indent = true
+pattern = '''
+if card.ability.consumeable then
+  if (card.area == G.pack_cards and G.pack_cards) then
+    return {
+'''
+payload = '''
+if card.ability.consumeable then
+    if (card.area == G.pack_cards and G.pack_cards) then
+        if card.ability[BalatrMod.prefix('unusable')] then
+            return {
+            n=G.UIT.ROOT, config = {padding = 0, colour = G.C.CLEAR}, nodes={
+              {n=G.UIT.R, config={mid = true}, nodes={
+              }},
+              {n=G.UIT.R, config={ref_table = card, r = 0.08, padding = 0.1, align = "bm", minw = 0.5*card.T.w - 0.15, minh = 0.8*card.T.h, maxw = 0.7*card.T.w - 0.15, hover = true, shadow = true, colour = G.C.GOLD, one_press = true, button = BalatrMod.prefix('woosh_consumable')}, nodes={
+                {n=G.UIT.T, config={text = localize('b_select'),colour = G.C.UI.TEXT_LIGHT, scale = 0.55, shadow = true}}
+              }},
+          }}
+      else return {
+'''
+
+
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+position = "at"
+match_indent = true
+pattern = '''
+end
+use =
+'''
+payload = '''
+end end
+use =
+'''
 
 
 # debug

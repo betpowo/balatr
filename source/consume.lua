@@ -14,9 +14,10 @@ local items = {
 	---------------------------------------------------------------------------
 	{
 		id = 'reciprocal',
+		x = 1,
 		name = 'Reciprocal',
 		text = {
-			"{C:dark_edition}Negative{} Jokers become normal,",
+			"{C:dark_edition,T:e_negative}Negative{} Jokers become normal,",
 			"and {C:attention}vice-versa{}"
 		},
 		config = { },
@@ -33,6 +34,73 @@ local items = {
 				end
 			end
 		end
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'nebula',
+		x = 2,
+		set = 'Tarot',
+		name = 'Nebula',
+		text = {
+			"Converts up to",
+            "{C:attention}#1#{} selected cards",
+            "to {C:"..BalatrMod.prefix('blorbs').."}Blorbs{}",
+		},
+		config = {suit_conv = BalatrMod.prefix('Blorbs'), max_highlighted = 3},
+		cost = 3,
+		loc_vars = function(self, info_queue, center)
+			return {
+				vars = {
+					self.config.max_highlighted
+				}
+			}
+		end
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'earth2',
+		set = 'Planet',
+		x = 3,
+		name = 'Earth',
+		text = {
+			"{S:0.8}({S:0.8,V:1}lvl.#1#{S:0.8}){} Level up",
+            "{C:attention}#2#",
+            "{C:mult}+#3#{} Mult and",
+            "{C:chips}+#4#{} chips",
+		},
+		config = {hand_type = BalatrMod.prefix('racism')},
+		cost = 3,
+		use = function(self, card, area, copier)
+    	    SMODS.smart_level_up_hand(card, BalatrMod.prefix('racism'))
+    	end,
+    	can_use = function(self, card)
+    	    return true
+		end,
+		loc_vars = function(self, info_queue, center)
+			local levelone = G.GAME.hands[BalatrMod.prefix('racism')].level or 1
+			local planetcolourone = G.C.HAND_LEVELS[math.min(levelone, 7)]
+			if levelone == 1 then
+				planetcolourone = G.C.UI.TEXT_DARK
+			end
+			return {
+				vars = {
+					G.GAME.hands[BalatrMod.prefix('racism')].level,
+					'Racism',
+					G.GAME.hands[BalatrMod.prefix('racism')].l_mult,
+					G.GAME.hands[BalatrMod.prefix('racism')].l_chips,
+					colours = {
+						(
+							to_big(G.GAME.hands[BalatrMod.prefix('racism')].level) == to_big(1) and G.C.UI.TEXT_DARK
+							or G.C.HAND_LEVELS[to_number(math.min(7, G.GAME.hands[BalatrMod.prefix('racism')].level))]
+						),
+					},
+				},
+			}
+		end,
 	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -62,7 +130,7 @@ for k, i in ipairs(items) do
 		loc_vars = i.loc_vars or function(self, info_queue, card)
 			return {}
 		end,
-		config = i.config,
+		config = i.config or {},
 		unlocked = true,
     	discovered = i.discovered or true,
 
