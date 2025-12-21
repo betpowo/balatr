@@ -635,12 +635,19 @@ local jokers = {
 			}, main_end = main_start }
 		end,
 		calculate = function(self, card, context)
-			if context.joker_main and pseudorandom('aldi') < (G.GAME.probabilities.normal / card.ability.extra.chance) then
-				local temp_Mult = pseudorandom('misprint', card.ability.extra.min, card.ability.extra.max)
-                return {
-                    message = localize{type='variable',key='a_mult',vars={temp_Mult}},
-                    mult_mod = temp_Mult
-                }
+			if context.joker_main then
+				if pseudorandom('aldi') < (G.GAME.probabilities.normal / card.ability.extra.chance) then
+					local temp_Mult = pseudorandom('misprint', card.ability.extra.min, card.ability.extra.max)
+                	return {
+                	    message = localize{type='variable',key='a_mult',vars={temp_Mult}},
+                	    mult_mod = temp_Mult
+                	}
+				else
+					return {
+                	    message = localize('k_nope_ex'),
+                	    colour = G.C.PURPLE
+                	}
+				end
 			end
 		end
 	},
