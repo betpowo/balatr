@@ -22,6 +22,10 @@ local items = {
 		},
 		config = { },
 		cost = 4,
+		loc_vars = function(self, info_queue, card)
+			info_queue[#info_queue+1] = G.P_CENTERS.e_negative
+			return {}
+		end,
 		can_use = function(self, card)
 			return G.jokers and #G.jokers.cards > 0
 		end,
@@ -56,6 +60,9 @@ local items = {
 					self.config.max_highlighted
 				}
 			}
+		end,
+		in_pool = function(self, args)
+			return BalatrMod.has_blorbs()
 		end
 	},
 	---------------------------------------------------------------------------

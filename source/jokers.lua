@@ -4,13 +4,6 @@ SMODS.Atlas {
     px = 71, py = 95,
 }
 
-SMODS.Sound {
-	key = 'whatsapp',
-	path = 'whatsapp.ogg',
-	pitch = 1
-}
-
-
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
@@ -167,6 +160,11 @@ local jokers = {
 		post_setup = function(self)
 			-- compatibility with yahimod......i love yahimod
 			self.pools = { ["Cat"] = true }
+			SMODS.Sound {
+				key = 'whatsapp',
+				path = 'whatsapp.ogg',
+				pitch = 1
+			}
 		end
 	},
 	---------------------------------------------------------------------------
@@ -326,6 +324,9 @@ local jokers = {
 					message = localize { type = 'variable', key = 'a_mult', vars = { card.ability.extra.mult } },
 				}
 			end
+		end,
+		in_pool = function(self, args)
+			return BalatrMod.has_blorbs()
 		end
 	},
 	---------------------------------------------------------------------------
@@ -336,23 +337,53 @@ local jokers = {
 		y = 1, x = 1,
 		name = 'Gambler',
 		text = {
-			"{X:mult,C:white}X#1#{} Mult on a {C:attention}certain condition,",
-			"{X:mult,C:white}X#2#{} Mult otherwise",
+			"{X:mult,C:white}X#1#{} Mult and {C:money}$#3#",
+			"on a {C:chips,E:2}certain condition,",
+			"{X:mult,C:white}X#2#{} Mult and {C:red}-$#4#{} otherwise",
 		},
-		config = { extra = { x_mult = 7, x_mult2 = 0.7 } },
+		config = { extra = { xmult = 7, xmult2 = 0.7, moola = 77, moola2 = 1 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
-				card.ability.extra.x_mult,
-				card.ability.extra.x_mult2,
+				card.ability.extra.xmult,
+				card.ability.extra.xmult2,
+				card.ability.extra.moola,
+				card.ability.extra.moola2,
 			} }
 		end,
 		calculate = function(self, card, context)
 			if context.joker_main then
-				return {
-					Xmult_mod = card.ability.extra.x_mult,
-					message = localize { type = 'variable', key = 'a_Xmult', vars = { card.ability.extra.x_mult } },
+				local a = card.ability.extra
+				local sum = 0
+				for _, i in ipairs(context.full_hand) do
+					sum = sum + i.base.nominal
+				end
+				local jackpot = ((sum % 7) == 0) or tostring(sum):find('7')
+				local ret = {
+					xmult = jackpot and a.xmult or a.xmult2,
+					dollars = jackpot and a.moola or -a.moola2
 				}
+				if jackpot then
+					ret.message = 'Jackpot!'
+					ret.colour = G.C.GOLD
+					ret.func = function()
+						G.E_MANAGER:add_event(Event({
+							func = function()
+								play_sound(BalatrMod.prefix('slots'))
+								G.ROOM.jiggle = G.ROOM.jiggle + 13
+								return true
+							end
+						}))
+					end
+				end
+				return ret
 			end
+		end,
+		post_setup = function(self)
+			SMODS.Sound {
+				key = 'slots',
+				path = 'slots.ogg',
+				pitch = 1
+			}
 		end
 	},
 	---------------------------------------------------------------------------
@@ -428,7 +459,7 @@ local jokers = {
 		text = {
 			"{C:chips}+#1#{} measly chip",
 		},
-		config = { extra = { chips = 1 } },
+		config = { extra = { chips = 1, rounds_left = 2 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
 				card.ability.extra.chips,
@@ -441,6 +472,58 @@ local jokers = {
 					message = localize { type = 'variable', key = 'a_chips', vars = { card.ability.extra.chips } },
 				}
 			end
+			if context.setting_blind then
+				card.ability.extra.rounds_left = card.ability.extra.rounds_left - 1
+				if card.ability.extra.rounds_left == 1 then
+					return {
+						message = "It's kicking!",
+						colour = G.C.SUITS.Hearts,
+						func = function()
+							juice_card_until(card, function(card)
+								return card.ability.extra and card.ability.extra.rounds_left == 1
+							end, true)
+							return true
+						end
+					}
+				elseif card.ability.extra.rounds_left == 0 then
+					G.E_MANAGER:add_event(Event({
+						func = function()
+							play_sound('tarot1')
+							card:juice_up(0.3, 0.3)
+							return true
+						end
+					}))
+					G.E_MANAGER:add_event(Event({
+						trigger = 'after', delay = 0.3,
+						func = function()
+							card:flip()
+							return true
+						end
+					}))
+					delay(0.4)
+					G.E_MANAGER:add_event(Event({
+						func = function()
+							card:set_ability(G.P_CENTERS['j_joker'])
+							return true
+						end
+					}))
+					G.E_MANAGER:add_event(Event({
+						trigger = 'after', delay = 0.3,
+						func = function()
+							card:flip()
+							return true
+						end
+					}))
+					G.E_MANAGER:add_event(Event({
+						trigger = 'after', delay = 0.3,
+						func = function()
+							play_sound('tarot2')
+							card:juice_up(0.3, 0.3)
+							return true
+						end
+					}))
+				end
+			end
 		end
 	},
 	{
@@ -448,99 +531,39 @@ local jokers = {
 		y = 1, x = 4,
 		name = 'IDK',
 		text = {
-			"Copies the ability of",
+			"Adds {C:inactive}+1{} to a random",
+			"{C:attention}perma-bonus{} from",
+			"each card scored"
 		},
 		rarity = 3,
-		-- __extr because Some Jokers use "extra" a a number value
-		config = { __extra = {jokers = {}, joker_names = {}, consecutive_triggers_this_frame = 0, chosen_joker = 'Joker' } },
-		loc_vars = function(self, info_queue, card)
-			return {
-				main_end = {
-					{
-						n = G.UIT.O,
-						config = {
-							object = DynaText({
-								string = card.ability.__extra.joker_names,
-								pop_in_rate = 9999999,
-								silent = true,
-								random_element = true,
-								pop_delay = 0.25,
-								scale = 0.32,
-								min_cycle_time = 0,
-								colours = {G.C.FILTER},
-								text_effect = BalatrMod.prefix('shake')
-							}),
-						}
-					}
-				}
-			}
-		end,
-		draw = function(self, card, layer)
-			love.graphics.print(card.ability.__extra.chosen_joker or self.config.__extra.chosen_joker,
-			card.T.x * (G.WINDOWTRANS.real_window_w / G.WINDOWTRANS.w), (card.T.y + 2.45) * (G.WINDOWTRANS.real_window_h / G.WINDOWTRANS.h), 0, 1, 1)
-		end,
-		-- i pray this works
-		update = function(self, card, dt)
-			if not card.ability.__extra then
-				card.ability.__extra = self.config.__extra
-			end
-			-- this cant be real
-			if not G.GAME.pseudorandom['idkcopy'] then
-				pseudorandom_element({1, 2, 3}, 'idkcopy')
-			end
-
-			if card.ability.__extra.joker_names and #card.ability.__extra.joker_names < 1 then
-				for k, v in pairs(G.P_CENTERS) do
-					-- only copy base jokers, for reasons
-					if k:sub(1, 2) == 'j_' and v.mod == nil then
-						table.insert(card.ability.__extra.joker_names, (v.loc_txt or v).name or k:sub(3))
-						table.insert(card.ability.__extra.jokers, k)
-					end
-				end
-			end			
-			card.ability.__extra.consecutive_triggers_this_frame = 0
-		end,
+		config = { extra = { bonuses = {
+			['perma_bonus'] = 'BLUE',
+			['perma_mult'] = 'RED',
+			['perma_x_chips'] = 'BLUE',
+			['perma_x_mult'] = 'RED',
+			['perma_h_chips'] = 'BLUE',
+			['perma_h_mult'] = 'RED',
+			['perma_h_x_chips'] = 'BLUE',
+			['perma_h_x_mult'] = 'RED',
+			['perma_p_dollars'] = 'GOLD',
+			['perma_h_dollars'] = 'GOLD',
+			['perma_repetitions'] = 'FILTER',
+		} } },
 		calculate = function(self, card, context)
-			local long = 'consecutive_triggers_this_frame'
-			card.ability.__extra[long] = card.ability.__extra[long] + 1
-			if card.ability.__extra[long] > 1 then return nil, true end
-			local og = card.ability.name
-			-- indices should be identical to the name table
-			local new, index = pseudorandom_element(card.ability.__extra.joker_names, 'idkcopy')
-			local ret, did_smth = nil, false
-			-- WHY IS IT NIL UNTILI HOVER THE CARD ????????
-			if new then
-				--print(new)
-				for k, v in pairs(card.ability) do
-					if k ~= '__extra' and k ~= 'extra' and k ~= 'set' and k ~= 'name'
-					and k ~= 'extra_slots_used' and k ~= 'h_size' and k ~= 'd_size' --[[??????]] then
-						card.ability[k] = nil
-					end
+			if context.individual and context.cardarea == G.play then
+				local oc = context.other_card
+				local keys = {}
+				for k, _ in pairs(card.ability.extra.bonuses) do
+					table.insert(keys, k)
 				end
-				for k, v in pairs(G.P_CENTERS[card.ability.__extra.jokers[index]].config or {}) do
-					--print(new..' | '..k..' : '..tostring(v))
-					if type(v) == 'number' then
-						-- sum weird scaling stuff
-						if (k == 'extra') then card.ability.extra = 0 end
-						card.ability[k] = (card.ability[k] or 0) + v
-						
-					else
-						card.ability[k] = v
-					end
-				end
-				
-				card.ability.name = new
-				card.ability.__extra.chosen_joker = new
-				-- vanilla joker stuff will not run if calculate is a function
-				local og_calculate = self.calculate
-				self.calculate = nil
-				ret, did_smth = card:calculate_joker(context)
-				self.calculate = og_calculate
-				card.ability.name = og
-				if ret or did_smth then print('ayo') end
-				card:juice_up()
-			end
-			return ret or {}, did_smth
+				local chosen = pseudorandom_element(keys, 'idkrandombonus')
+				oc.ability[chosen] = oc.ability[chosen] or (chosen:find('x_') and 1 or 0)
+				oc.ability[chosen] = oc.ability[chosen] + 1
+        		return {
+        		    extra = { message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]] },
+        		    card = card
+        		}
+        	end
 		end
 	},
 		---------------------------------------------------------------------------

@@ -11,10 +11,9 @@ local blinds = {
 		end,
 		-- make it fair and square....
 		mult = 0.25,
-		boss = {
-			min = 1,
-			max = 3
-		}
+		in_pool = function(self)
+			return G.GAME.round_resets.ante < 4
+		end
 	},
 	{
 		id = 'vacuum',
@@ -26,6 +25,9 @@ local blinds = {
 		debuff = {
 			suit = BalatrMod.prefix('Blorbs')
 		},
+		in_pool = function(self)
+			return BalatrMod.has_blorbs()
+		end
 	},
 	{
 		id = 'bird',

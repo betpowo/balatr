@@ -163,3 +163,24 @@ SMODS.Challenge {
 		cards = get_blorbs()
 	}
 }
+SMODS.Challenge {
+	key = "suffering",
+	loc_txt = {
+		name = "Suffering from Success"
+	},
+	rules = {
+		custom = {
+			{id = 'scaling', value = 10},
+		},
+		modifiers = {
+		}
+	},
+	jokers = {
+		{ id = "j_"..BalatrMod.prefix('idk'), eternal = true, edition = "negative" },
+		{ id = "j_"..BalatrMod.prefix('idk'), eternal = true, edition = "negative" },
+		{ id = "j_"..BalatrMod.prefix('idk'), eternal = true, edition = "negative" },
+	},
+	deck = {
+		type = 'Challenge Deck',
+	}
+}

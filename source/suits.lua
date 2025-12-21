@@ -54,7 +54,7 @@ SMODS.Suit {
 	},
 	pools = {['BalatrPool'] = true},
 	in_pool = function(self, args)
-		return false
+		return BalatrMod.has_blorbs()
 	end
 }
 
