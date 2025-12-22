@@ -571,7 +571,8 @@ local jokers = {
 							card:juice_up(0.3, 0.3)
 							oc:juice_up()
 							--TODO: actually make these show up (implement them)
-							--card.ability[BalatrMod.prefix('the_idk_graphics_thing')] = true
+							--betty from the future here, its better to just do builtin stickers instead
+							oc:add_sticker(BalatrMod.prefix('idk'), true)
 							card_eval_status_text(card, 'extra', nil, nil, nil, {
 								message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]],
 								sound = 'tarot2', instant = true
@@ -581,13 +582,6 @@ local jokers = {
 					}))
 				end
         	end
-		end,
-		post_setup = function(self)
-			SMODS.Atlas {
-				key = 'idk-bonus-stickers-sheet',
-				path = 'idk-bonus-stickers-sheet.png',
-				px = 71, py = 95
-			}
 		end
 	},
 		---------------------------------------------------------------------------
