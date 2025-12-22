@@ -20,9 +20,9 @@ local jokers = {
 		text = {
 			"{C:inactive}/jo - qwuj/{}",
 			"{C:chips}+#1#{} Chips",
-			"if played hand",
-			"can be {C:attention}flipped{}",
-			"{C:inactive}(e.g. [4, 3, 2, 3, 4])"
+			"if played hand is",
+			"a {C:attention}palindrome{}",
+			"{C:inactive}(ex: {C:attention}4 3 2 3 4{C:inactive})"
 		},
 		config = { extra = { chips = 250 } },
 		loc_vars = function(self, info_queue, card)
@@ -47,9 +47,9 @@ local jokers = {
 		text = {
 			"{C:inactive}/ruh - kur/{}",
 			"{C:mult}+#1#{} Mult",
-			"if played hand",
-			"can be {C:attention}flipped{}",
-			"{C:inactive}(e.g. [4, 3, 2, 3, 4])"
+			"if played hand is",
+			"a {C:attention}palindrome{}",
+			"{C:inactive}(ex: {C:attention}4 3 2 3 4{C:inactive})"
 		},
 		config = { extra = { mult = 16 } },
 		loc_vars = function(self, info_queue, card)
@@ -363,12 +363,14 @@ local jokers = {
 					dollars = jackpot and a.moola or -a.moola2
 				}
 				if jackpot then
-					ret.message = 'Jackpot!'
-					ret.colour = G.C.GOLD
 					ret.func = function()
 						G.E_MANAGER:add_event(Event({
 							func = function()
-								play_sound(BalatrMod.prefix('slots'))
+								card_eval_status_text(card, 'extra', nil, nil, nil, {
+									message = 'Jackpot!', colour = G.C.GOLD,
+									sound = 'xchips', instant = true, pitch = 2
+								})
+								play_sound(BalatrMod.prefix('slots'), 1, 0.6)
 								G.ROOM.jiggle = G.ROOM.jiggle + 13
 								return true
 							end
@@ -531,11 +533,11 @@ local jokers = {
 		y = 1, x = 4,
 		name = 'IDK',
 		text = {
-			"Adds {C:inactive}+1{} to a random",
-			"{C:attention}perma-bonus{} from",
-			"each card scored"
+			"Adds a {C:"..BalatrMod.prefix('rainbow').."}perma-bonus{}",
+			"to every card scored",
 		},
 		rarity = 3,
+		cost = 8,
 		config = { extra = { bonuses = {
 			['perma_bonus'] = 'BLUE',
 			['perma_mult'] = 'RED',
@@ -551,19 +553,41 @@ local jokers = {
 		} } },
 		calculate = function(self, card, context)
 			if context.individual and context.cardarea == G.play then
-				local oc = context.other_card
 				local keys = {}
 				for k, _ in pairs(card.ability.extra.bonuses) do
 					table.insert(keys, k)
 				end
-				local chosen = pseudorandom_element(keys, 'idkrandombonus')
-				oc.ability[chosen] = oc.ability[chosen] or (chosen:find('x_') and 1 or 0)
-				oc.ability[chosen] = oc.ability[chosen] + 1
-        		return {
-        		    extra = { message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]] },
-        		    card = card
-        		}
+
+				local oc = context.other_card
+				if oc and not oc.debuff then
+					G.E_MANAGER:add_event(Event({
+						trigger = 'before',
+						delay = 0.6,
+						blocking = true,
+						func = function()
+							local chosen = pseudorandom_element(keys, 'idkrandombonus')
+							oc.ability[chosen] = oc.ability[chosen] or (chosen:find('x_') and 1 or 0)
+							oc.ability[chosen] = oc.ability[chosen] + 1
+							card:juice_up(0.3, 0.3)
+							oc:juice_up()
+							--TODO: actually make these show up (implement them)
+							--card.ability[BalatrMod.prefix('the_idk_graphics_thing')] = true
+							card_eval_status_text(card, 'extra', nil, nil, nil, {
+								message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]],
+								sound = 'tarot2', instant = true
+							})
+							return true
+						end
+					}))
+				end
         	end
+		end,
+		post_setup = function(self)
+			SMODS.Atlas {
+				key = 'idk-bonus-stickers-sheet',
+				path = 'idk-bonus-stickers-sheet.png',
+				px = 71, py = 95
+			}
 		end
 	},
 		---------------------------------------------------------------------------

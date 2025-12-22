@@ -72,6 +72,12 @@ SMODS.Gradient {
 	interpolation = 'linear',
 	colours = BalatrMod.generate_glow(G.C.UI_MULT)
 }
+SMODS.Gradient {
+	key = 'rainbow',
+	cycle = 5,
+	interpolation = 'linear',
+	colours = {G.C.RED,G.C.FILTER,G.C.GREEN,G.C.BLUE,G.C.PURPLE,HEX('fa44f9')}
+}
 
 -- why is this not documented???
 SMODS.DynaTextEffect {
@@ -91,3 +97,10 @@ for _, file in ipairs(files) do
 	end
 	f()
 end
+
+SMODS.Atlas {
+	key = "modicon",
+	path = "modicon.png",
+	px = 32,
+	py = 32
+}
