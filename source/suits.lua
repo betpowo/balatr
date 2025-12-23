@@ -13,6 +13,11 @@ SMODS.Atlas {
     path = "blorb.png",
     px = 71, py = 95,
 }
+SMODS.Atlas {
+    key = "suit_blorbs-hc",
+    path = "blorb-hc.png",
+    px = 71, py = 95,
+}
 
 SMODS.Atlas {
     key = "boosters_balatr",
@@ -41,9 +46,9 @@ SMODS.Suit {
     key = 'Blorbs',
     card_key = 'B',
 	atlas = 'suit_blorbs',
-	hc_atlas = 'suit_blorbs', -- TODO: high contrast graphics
+	hc_atlas = 'suit_blorbs-hc',
 	lc_atlas = 'suit_blorbs',
-	hc_colour = '6b009c',
+	hc_colour = '8E3CDB',
 	lc_colour = 'c561ec',
     pos = { y = 0 },
     ui_pos = { x = 0, y = 0 },
@@ -115,6 +120,11 @@ for _, i in ipairs({'Blorbs'}) do
         path = 'collabs/collab_BTP_'..first..'.png',
         px = 71, py = 95,
     }
+    SMODS.Atlas {
+        key = 'collab_BTP_'..first..'-hc',
+        path = 'collabs/hc/collab_BTP_'..first..'.png',
+        px = 71, py = 95,
+    }
     SMODS.DeckSkin {
         key = 'collab_BTP_'..first,
         suit = BalatrMod.prefix(i),
@@ -124,6 +134,13 @@ for _, i in ipairs({'Blorbs'}) do
                 ranks = FUCK,
                 atlas = BalatrMod.prefix('collab_BTP_'..first),
                 pos_style = 'collab'
+            },
+            {
+                key = 'hc',
+                ranks = FUCK,
+                atlas = BalatrMod.prefix('collab_BTP_'..first..'-hc'),
+                pos_style = 'collab',
+                hc_default = true
             }
         },
         loc_txt = poop

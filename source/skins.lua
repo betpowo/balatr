@@ -10,6 +10,11 @@ for _, i in ipairs({'Spades', 'Hearts', 'Clubs', 'Diamonds'}) do
         path = 'collabs/collab_BTP_'..first..'.png',
         px = 71, py = 95,
     }
+    SMODS.Atlas {
+        key = 'collab_BTP_'..first..'-hc',
+        path = 'collabs/hc/collab_BTP_'..first..'.png',
+        px = 71, py = 95,
+    }
     SMODS.DeckSkin {
         key = 'collab_BTP_'..first,
         suit = i,
@@ -19,6 +24,13 @@ for _, i in ipairs({'Spades', 'Hearts', 'Clubs', 'Diamonds'}) do
                 ranks = FUCK,
                 atlas = BalatrMod.prefix('collab_BTP_'..first),
                 pos_style = 'collab'
+            },
+            {
+                key = 'hc',
+                ranks = FUCK,
+                atlas = BalatrMod.prefix('collab_BTP_'..first..'-hc'),
+                pos_style = 'collab',
+                hc_default = true
             }
         },
         loc_txt = poop
