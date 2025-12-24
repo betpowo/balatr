@@ -44,7 +44,7 @@ local blinds = {
 			G.hand.config[BalatrMod.prefix('real_high_limit')] = G.hand.config.highlighted_limit
 			G.hand.config.highlighted_limit = #G.hand.cards
     	    for i = 1, #G.hand.cards do
-    	        if (G.hand.cards[i]:get_id() <= 5) and not SMODS.has_enhancement(G.hand.cards[i], 'm_stone') then
+    	        if (G.hand.cards[i].base.nominal <= 5) and not SMODS.has_enhancement(G.hand.cards[i], 'm_stone') then
     	            local _selected_card = G.hand.cards[i]
 					table.insert(cards_selected, _selected_card)
     	            G.hand:add_to_highlighted(_selected_card, true)
@@ -71,7 +71,7 @@ local blinds = {
 			if G.GAME.blind.disabled then return false end
     	    local broke = false
     	    for i = 1, #G.play.cards do
-    	        if (G.play.cards[i]:get_id() <= 5) and not SMODS.has_enhancement(G.play.cards[i], 'm_stone') then
+    	        if (G.play.cards[i].base.nominal <= 5) and not SMODS.has_enhancement(G.play.cards[i], 'm_stone') then
     	            broke = true
     	        end
     	    end
@@ -80,6 +80,10 @@ local blinds = {
     	        return true
     	    end
     	end,
+		in_pool = function(self)
+			-- instant game over since every card in deck at start is 5 and lower
+			return next(SMODS.find_mod("UnStable")) and G.GAME.selected_back.name ~= 'b_unstb_lowkey'
+		end
 	},
 	{
 		id = 'reunion',
