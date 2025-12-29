@@ -461,7 +461,7 @@ local jokers = {
 		text = {
 			"{C:chips}+#1#{} measly chip",
 		},
-		config = { extra = { chips = 1, rounds_left = 2 } },
+		config = { extra = { chips = 1, rounds_left = 9 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
 				card.ability.extra.chips,
@@ -666,6 +666,101 @@ local jokers = {
                 	    colour = G.C.PURPLE
                 	}
 				end
+			end
+		end
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'atomic_bomb',
+		x = 7, y = 1,
+		name = 'Atomic Bomb',
+		text = {
+			"{X:"..BalatrMod.prefix('e_chips')..",C:white}^#1#{} Chips and {X:"..BalatrMod.prefix('e_mult')..",C:white}^#2#{} Mult",
+			"{C:red,E:2}self destructs{}"
+		},
+		rarity = 3,
+		cost = 5,
+		config = { extra = { ec = 1000, em = 1000 } },
+		loc_vars = function(self, info_queue, card)
+			return { vars = { 
+				card.ability.extra.ec,
+				card.ability.extra.em,
+			} }
+		end,
+		post_setup = function(self)
+			self.eternal_compat = false
+			local og___love_draw = love.draw
+			BalatrMod.flashbang_level = 0
+			function love.draw()
+				if BalatrMod.flashbang_level <= 0 then
+					og___love_draw()
+					return
+				end
+				local dt = 1 / love.timer.getFPS()
+				BalatrMod.flashbang_level = math.max(0, BalatrMod.flashbang_level - (dt * 0.1))
+				if BalatrMod.flashbang_level > 0 then
+					-- reset
+					love.graphics.setColor(G.C.WHITE)
+					love.graphics.setBlendMode('alpha')
+				end
+				og___love_draw()
+				if BalatrMod.flashbang_level > 0 then
+					local w, h, mode = love.window.getMode()
+					--love.graphics.setColor(G.GAME.blind.config.blind.boss_colour)
+					love.graphics.setColor(BalatrMod.flashbang_level, BalatrMod.flashbang_level, BalatrMod.flashbang_level, 1)
+					love.graphics.setBlendMode("add", "premultiplied")
+            		love.graphics.rectangle("fill", 0, 0, w, h)
+					love.graphics.setBlendMode('alpha')
+					G.ROOM.jiggle = G.ROOM.jiggle + BalatrMod.flashbang_level * dt * 99
+				end
+			end
+		end,
+		calculate = function(self, card, context)
+			-- TODO.: make talisman a dependency, i dont think i wanna handle exponentials myself
+			if context.joker_main then
+				return {
+					e_chips = card.ability.extra.ec,
+					e_mult = card.ability.extra.em,
+					remove_default_message = true,
+					func = function()
+						G.E_MANAGER:add_event(Event({
+							trigger = 'before',
+							func = function()
+								BalatrMod.flashbang_level = 1.5
+								-- i know the sound is misleading making u believe
+								-- its ^^^1000 but cmonnn theyre funnier
+								play_sound('talisman_eeemult')
+								play_sound('talisman_eeemult', 0.25)
+								play_sound('talisman_eeechip')
+								play_sound('talisman_eeechip', 0.5)
+								play_sound(BalatrMod.prefix('ultra_fart'), 0.3, 5)
+								return true
+							end
+						}))
+						G.E_MANAGER:add_event(Event({
+							func = function()
+								play_sound('tarot1')
+								card.T.r = -0.2
+								card:juice_up(0.3, 0.4)
+								card.states.drag.is = true
+								card.children.center.pinch.x = true
+								G.E_MANAGER:add_event(Event({
+									trigger = 'after',
+									delay = 0.3,
+									func = function()
+										G.jokers:remove_card(card)
+										card:remove()
+										card = nil
+										return true;
+									end
+								}))
+								return true
+							end
+						}))
+					end
+				}
 			end
 		end
 	},
