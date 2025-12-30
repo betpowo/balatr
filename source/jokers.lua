@@ -175,8 +175,8 @@ local jokers = {
 		x = 5,
 		name = "SUPER F",
 		text = {
-			"{C:mult}+#1#{} Mult",
-			"for every {C:attention}2{} played",
+			"Each played {C:attention}2{} gives",
+			"{C:mult}+#1#{} Mult when scored",
 		},
 		config = { extra = { mult = 1 } },
 		loc_vars = function(self, info_queue, card)
@@ -273,7 +273,7 @@ local jokers = {
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.mult, card.ability.extra.Xmult, card.ability.extra.blood_fury, card.ability.extra.ndmt } }
 		end,
-		cost = 4,
+		cost = 6,
 		rarity = 3,
 		calculate = function(self, card, context)
 			if context.joker_main then
@@ -317,6 +317,7 @@ local jokers = {
 				card.ability.extra.mult,
 			} }
 		end,
+		cost = 3,
 		calculate = function(self, card, context)
 			if context.individual and context.cardarea == G.play and context.other_card and context.other_card:is_suit(BalatrMod.prefix('Blorbs')) then
 				return {
@@ -350,6 +351,8 @@ local jokers = {
 				card.ability.extra.moola2,
 			} }
 		end,
+		cost = 7,
+		rarity = 2,
 		calculate = function(self, card, context)
 			if context.joker_main then
 				local a = card.ability.extra
@@ -399,18 +402,20 @@ local jokers = {
 			"Destroys up to {C:attention}#1#{} {C:inactive}(#3#){}",
 			"{C:red}discarded{} cards per round and",
 			"adds their {C:chips}chips{} to this Joker",
-			"{C:inactive}(Currently {}{C:chips}+#2#{}{C:inactive} Chips){}"
+			"{C:inactive}(Currently {}{C:chips}+#2#{}{C:inactive} Chips){}",
+			"{C:inactive}(Resets after {}{C:attention}Boss{}{C:inactive} Blind){}"
 		},
-		config = { extra = { chips = 0, max_cards = 5, c_c = 0 } },
+		config = { extra = { chips = 0, max_cards = 5, c_c = 0, alloc = false } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
 				card.ability.extra.max_cards,
 				card.ability.extra.chips,
-				card.ability.extra.c_c,
-
+				card.ability.extra.max_cards - card.ability.extra.c_c,
 			} }
 		end,
-		rarity = 2,
+		rarity = 3,
+		cost = 8,
+		blueprint_compat = false,
 		calculate = function(self, card, context)
 			if context.joker_main and card.ability.extra.chips > 0 then
 				return {
@@ -422,32 +427,42 @@ local jokers = {
 				if card.ability.extra.c_c < card.ability.extra.max_cards then
 					local oc = context.other_card
 					local chip_mod =  oc.base.nominal + oc.ability.bonus + ((oc.edition and oc.edition.foil) and 50 or 0)
-
-					--print(oc.config.card_key)
-					--print(chip_mod)
-
-					--SMODS.destroy_cards(oc)
-            	    
-					G.E_MANAGER:add_event(Event({
-						delay = 0.5,
-						blockable = false,
-						func = function()
-							-- this only exists to make a small pause when destroying card
-							return true
-						end
-					}))
+					--SMODS.destroy_cards(oc) -- this wont actually remove them for some reason ????
 					card.ability.extra.chips = card.ability.extra.chips + chip_mod
 					card.ability.extra.c_c = card.ability.extra.c_c + 1
-
 					return {
-						colour = G.C.UI_CHIPS,
+						delay = 0.6,
 						remove = true,
 						message = localize { type = 'variable', key = 'a_chips', vars = { chip_mod } },
+						colour = G.C.UI_CHIPS,
+						func = function()
+							G.E_MANAGER:add_event(Event({
+								trigger = 'before',
+								func = function()
+									if card.ability.extra.c_c == card.ability.extra.max_cards and not card.ability.extra.alloc then
+										card.ability.extra.alloc = true
+										card_eval_status_text(card, 'extra', nil, nil, nil, {
+											message = 'Allocated!', colour = G.C.FILTER,
+											sound = 'tarot2'
+										})
+									end
+									return true
+								end
+							}))
+						end
 					}
 				end
 			end
-			if context.end_of_round then
+			if context.end_of_round and context.game_over == false then
 				card.ability.extra.c_c = 0
+				card.ability.extra.alloc = false
+				if G.GAME.blind and G.GAME.blind.boss then
+					card.ability.extra.chips = 0
+					return {
+						colour = G.C.FILTER,
+						message = 'Dumped!',
+					}
+				end
 			end
 		end
 	},
@@ -605,6 +620,7 @@ local jokers = {
 				card.ability.extra.bonus,
 			} }
 		end,
+		cost = 15,
 		calculate = function(self, card, context)
 		end,
 		calc_dollar_bonus = function(self, card)
@@ -630,7 +646,8 @@ local jokers = {
 			"{C:green}#1# in #2#{} chance",
 		},
 		config = { extra = { chance = 25, min = 0, max = 23 } },
-		rarity = 2,
+		rarity = 1,
+		cost = 2,
 		loc_vars = function(self, info_queue, card)
 			-- just take it from misprint brah
 			local r_mults = {}
@@ -700,14 +717,20 @@ local jokers = {
 				end
 				local dt = 1 / love.timer.getFPS()
 				BalatrMod.flashbang_level = math.max(0, BalatrMod.flashbang_level - (dt * 0.1))
+				local w, h, mode = love.window.getMode()
 				if BalatrMod.flashbang_level > 0 then
-					-- reset
+					-- fill screen with black
+					-- hopefully for those pesky CRT setting users to
+					-- not see those white lines after
+					love.graphics.setColor(0, 0, 0, 1)
+					love.graphics.rectangle("fill", 0, 0, w, h)
+
+					-- reset sprites
 					love.graphics.setColor(G.C.WHITE)
 					love.graphics.setBlendMode('alpha')
 				end
 				og___love_draw()
 				if BalatrMod.flashbang_level > 0 then
-					local w, h, mode = love.window.getMode()
 					--love.graphics.setColor(G.GAME.blind.config.blind.boss_colour)
 					love.graphics.setColor(BalatrMod.flashbang_level, BalatrMod.flashbang_level, BalatrMod.flashbang_level, 1)
 					love.graphics.setBlendMode("add", "premultiplied")
@@ -726,9 +749,9 @@ local jokers = {
 					remove_default_message = true,
 					func = function()
 						G.E_MANAGER:add_event(Event({
-							trigger = 'before',
+							delay = 1,
 							func = function()
-								BalatrMod.flashbang_level = 1.5
+								BalatrMod.flashbang_level = 2
 								-- i know the sound is misleading making u believe
 								-- its ^^^1000 but cmonnn theyre funnier
 								play_sound('talisman_eeemult')
@@ -736,11 +759,6 @@ local jokers = {
 								play_sound('talisman_eeechip')
 								play_sound('talisman_eeechip', 0.5)
 								play_sound(BalatrMod.prefix('ultra_fart'), 0.3, 5)
-								return true
-							end
-						}))
-						G.E_MANAGER:add_event(Event({
-							func = function()
 								play_sound('tarot1')
 								card.T.r = -0.2
 								card:juice_up(0.3, 0.4)
