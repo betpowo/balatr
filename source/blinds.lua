@@ -92,13 +92,11 @@ local blinds = {
 		text = {
 			"All cards in deck", "are held in hand"
 		},
-		config = {card_limit = 8},
 		set_blind = function(self)
-			self.config.card_limit = G.hand.config.card_limit
-			G.hand:change_size(#G.deck.cards - G.hand.config.card_limit)
+			G.hand:change_size(#G.deck.cards)
 		end,
 		defeat = function(self)
-			G.hand:change_size(-(#G.deck.cards - self.config.card_limit))
+			G.hand:change_size(-(#G.deck.cards))
 		end
 	},
 	{

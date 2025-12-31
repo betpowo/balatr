@@ -19,7 +19,8 @@ local hands = {
             { 'D_6', false },
         },
         evaluate = function(parts, hand)
-            if next(parts._3) then
+            -- #parts._2 < 1 , to allow a full house to be played when the 3 cards are kings (it annoyed me)
+            if next(parts._3) and #parts._2 < 1 then
                 local _strush = SMODS.merge_lists(parts._3)
                 local royal = true
                 for j = 1, #_strush do
@@ -109,7 +110,7 @@ local hands = {
     {
         id = '6oak',
         name = 'Six of a Kind',
-        text = {"6 cards of the same rank"},
+        text = {"6 cards with the same rank"},
         chips = 160, mult = 20,
         l_chips = 60, l_mult = 4,
         example = {
