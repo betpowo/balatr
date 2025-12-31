@@ -124,10 +124,6 @@ local blinds = {
 			
 			BalatrMod.green_fill_progress = 0
 			function love.draw()
-				if not BalatrMod.green or BalatrMod.green_fill_progress <= 0 then
-					og___love_draw()
-					return
-				end
 				-- die "main menu" button
 				if (G.GAME and G.GAME.blind and G.GAME.blind.config
 				and G.GAME.blind.config.blind.name == 'bl_'..BalatrMod.prefix('green')

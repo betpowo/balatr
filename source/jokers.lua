@@ -543,68 +543,12 @@ local jokers = {
 			end
 		end
 	},
-	{
-		id = 'idk',
-		y = 1, x = 4,
-		name = 'IDK',
-		text = {
-			"Adds a {C:"..BalatrMod.prefix('rainbow').."}perma-bonus{}",
-			"to every card scored",
-		},
-		rarity = 3,
-		cost = 8,
-		config = { extra = { bonuses = {
-			['perma_bonus'] = 'BLUE',
-			['perma_mult'] = 'RED',
-			['perma_x_chips'] = 'BLUE',
-			['perma_x_mult'] = 'RED',
-			['perma_h_chips'] = 'BLUE',
-			['perma_h_mult'] = 'RED',
-			['perma_h_x_chips'] = 'BLUE',
-			['perma_h_x_mult'] = 'RED',
-			['perma_p_dollars'] = 'GOLD',
-			['perma_h_dollars'] = 'GOLD',
-			['perma_repetitions'] = 'FILTER',
-		} } },
-		calculate = function(self, card, context)
-			if context.individual and context.cardarea == G.play then
-				local keys = {}
-				for k, _ in pairs(card.ability.extra.bonuses) do
-					table.insert(keys, k)
-				end
-
-				local oc = context.other_card
-				if oc and not oc.debuff then
-					G.E_MANAGER:add_event(Event({
-						trigger = 'before',
-						delay = 0.6,
-						blocking = true,
-						func = function()
-							local chosen = pseudorandom_element(keys, 'idkrandombonus')
-							oc.ability[chosen] = oc.ability[chosen] or (chosen:find('x_') and 1 or 0)
-							oc.ability[chosen] = oc.ability[chosen] + 1
-							card:juice_up(0.3, 0.3)
-							oc:juice_up()
-							--TODO: actually make these show up (implement them)
-							--betty from the future here, its better to just do builtin stickers instead
-							oc:add_sticker(BalatrMod.prefix('idk'), true)
-							card_eval_status_text(card, 'extra', nil, nil, nil, {
-								message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]],
-								sound = 'tarot2', instant = true
-							})
-							return true
-						end
-					}))
-				end
-        	end
-		end
-	},
-		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
 		id = 'bdv',
-		y = 1, x = 5,
+		y = 1, x = 6,
 		name = 'PagoMovil',
 		text = {
 			"Go up to {C:red}-$#1#{} in debt",
@@ -639,8 +583,21 @@ local jokers = {
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
+		id = 'blank',
+		name = 'Blank',
+		text = {
+			"{C:inactive}Does nothing...?"
+		},
+		rarity = 1,
+		cost = 1,
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	
+	{
 		id = 'aldi',
-		y = 1, x = 6,
+		y = 1, x = 7,
 		name = 'Aldi',
 		text = {
 			"{C:green}#1# in #2#{} chance",
@@ -691,7 +648,7 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'atomic_bomb',
-		x = 7, y = 1,
+		y = 1, x = 8,
 		name = 'Atomic Bomb',
 		text = {
 			"{X:"..BalatrMod.prefix('e_chips')..",C:white}^#1#{} Chips and {X:"..BalatrMod.prefix('e_mult')..",C:white}^#2#{} Mult",
@@ -782,6 +739,99 @@ local jokers = {
 			end
 		end
 	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'idk',
+		y = 1, x = 4,
+		soul_pos = {x = 5, y = 1},
+		name = 'IDK',
+		text = {
+			"Adds a {C:"..BalatrMod.prefix('rainbow').."}perma-bonus{}",
+			"to every card scored",
+		},
+		rarity = 4,
+		cost = 10,
+		config = { extra = { bonuses = {
+			['perma_bonus'] = 'BLUE',
+			['perma_mult'] = 'RED',
+			['perma_x_chips'] = 'BLUE',
+			['perma_x_mult'] = 'RED',
+			['perma_h_chips'] = 'BLUE',
+			['perma_h_mult'] = 'RED',
+			['perma_h_x_chips'] = 'BLUE',
+			['perma_h_x_mult'] = 'RED',
+			['perma_p_dollars'] = 'GOLD',
+			['perma_h_dollars'] = 'GOLD',
+			['perma_repetitions'] = 'FILTER',
+		} } },
+		calculate = function(self, card, context)
+			if context.individual and context.cardarea == G.play then
+				local keys = {}
+				for k, _ in pairs(card.ability.extra.bonuses) do
+					table.insert(keys, k)
+				end
+
+				local oc = context.other_card
+				if oc and not oc.debuff then
+					G.E_MANAGER:add_event(Event({
+						trigger = 'before',
+						delay = 0.6,
+						blocking = true,
+						func = function()
+							local chosen = pseudorandom_element(keys, 'idkrandombonus')
+							oc.ability[chosen] = oc.ability[chosen] or (chosen:find('x_') and 1 or 0)
+							oc.ability[chosen] = oc.ability[chosen] + 1
+							card:juice_up(0.3, 0.3)
+							oc:juice_up()
+							--TODO: actually make these show up (implement them)
+							--betty from the future here, its better to just do builtin stickers instead
+							oc:add_sticker(BalatrMod.prefix('idk'), true)
+							card_eval_status_text(card, 'extra', nil, nil, nil, {
+								message = localize('k_upgrade_ex'), colour = G.C[card.ability.extra.bonuses[chosen]],
+								sound = 'tarot2', instant = true
+							})
+							return true
+						end
+					}))
+				end
+        	end
+		end
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'tiny',
+		y = 1, x = 9,
+		soul_pos = {x = 0, y = 2},
+		name = ':tiny:',
+		text = {
+			"Be able to play",
+			"{C:"..BalatrMod.prefix('rainbow').."}+#1#{} more card"
+		},
+		rarity = 4,
+		cost = 10,
+		config = { extra = { cards = 1 } },
+		loc_vars = function(self, info_queue, card)
+			return { vars = { 
+				card.ability.extra.cards
+			} }
+		end,
+		add_to_deck = function(_, card, from_debuff)
+			-- i hate this game
+			G.hand.config.highlighted_limit = G.hand.config.highlighted_limit + card.ability.extra.cards
+			G.GAME.starting_params.play_limit = G.GAME.starting_params.play_limit + card.ability.extra.cards
+			G.GAME.starting_params.discard_limit = G.GAME.starting_params.discard_limit + card.ability.extra.cards
+		end,
+		remove_from_deck = function(_, card, from_debuff)
+			G.hand.config.highlighted_limit = G.hand.config.highlighted_limit - card.ability.extra.cards
+			G.GAME.starting_params.play_limit = G.GAME.starting_params.play_limit - card.ability.extra.cards
+			G.GAME.starting_params.discard_limit = G.GAME.starting_params.discard_limit - card.ability.extra.cards
+		end,
+	},
+	
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
