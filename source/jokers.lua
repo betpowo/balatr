@@ -710,7 +710,7 @@ local jokers = {
 			"{C:inactive}(Currently {}{V:1,E:"..BalatrMod.prefix('shake').."}#3#{}{C:inactive} Blood Fury, {C:"..BalatrMod.prefix('e_mult').."}#4#{} {C:inactive}NDMT,{}",
 			"{C:inactive}(Whirlpool: {}{V:2,E:1}#7#{}{C:inactive}){}"
 		},
-		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 6, ndmt_whirl = 6, whirlpool = false } },
+		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 666, ndmt_whirl = 666, whirlpool = false } },
 		loc_vars = function(self, info_queue, card)
 			info_queue[#info_queue+1] = G.P_CENTERS['e_'..BalatrMod.prefix('demonic')]
 			return { vars = {
