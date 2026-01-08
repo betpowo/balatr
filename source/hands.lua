@@ -19,9 +19,8 @@ local hands = {
             { 'D_6', false },
         },
         evaluate = function(parts, hand)
-            -- #parts._2 < 1 , to allow a full house to be played when the 3 cards are kings (it annoyed me)
-            if next(parts._3) and #parts._2 < 1 then
-                local _strush = SMODS.merge_lists(parts._3)
+            if next(parts._3) then
+                local _strush = SMODS.merge_lists(parts._3, parts._2)
                 local royal = true
                 for j = 1, #_strush do
                     local rank = SMODS.Ranks[_strush[j].base.value]

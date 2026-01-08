@@ -32,7 +32,6 @@ SMODS.Edition {
 			"{C:mult}+#4#{} Mult",
 			"{X:mult,C:white}X#5#{} Mult",
 			"{X:"..BalatrMod.prefix('e_mult')..",C:white}^#6#{} Mult",
-			"{C:inactive}({}{C:money}Talisman{}{C:inactive} required){}"
         }
     },
 	weight = 0.6,
@@ -78,38 +77,31 @@ SMODS.Edition {
 			context.main_scoring -- for when on playing cards
 			and context.cardarea == G.play
 		) then
-			-- no point
-			if BalatrMod.talisman then
-				return {
-					-- its only a func so we can use the awesome sound....
-					chip_mod   = self.config.chips ,
-					Xchip_mod = self.config.x_chips,
-					Echip_mod = self.config.e_chips,
-					mult_mod    = self.config.mult ,
-					Xmult_mod  = self.config.x_mult,
-					Emult_mod  = self.config.e_mult,
-					func = function()
-						card_eval_status_text(card, 'jokers', nil, 1, nil, {
-							message = '?!?!?!?!',
-							colour = G.C.EDITION, edition = true,
-							delay = 2,
-							sound = BalatrMod.prefix("demonic"),
-							volume = 5
-						})
-						G.ROOM.jiggle = G.ROOM.jiggle + 7
-					end
-				}
-			end
-			-- ????
 			return {
+				-- its only a func so we can use the awesome sound....
+				chip_mod   = self.config.chips ,
+				Xchip_mod  = self.config.x_chips,
+				Echip_mod  = self.config.e_chips,
+				mult_mod   = self.config.mult ,
+				Xmult_mod  = self.config.x_mult,
+				Emult_mod  = self.config.e_mult,
 				func = function()
-					card_eval_status_text(card, 'jokers', nil, percent, nil, {
-						message = 'Nope!',
-						colour = G.C.RED,
-						sound = 'cancel',
+					G.E_MANAGER:add_event(Event({
+						trigger = 'immediate',
+						blockable = true,
+						func = function()
+							G.ROOM.jiggle = G.ROOM.jiggle + 6
+							return true
+						end
+					}))
+					card_eval_status_text(card, 'jokers', nil, 1, nil, {
+						message = '?!?!?!?!',
+						colour = G.C.EDITION, edition = true,
+						delay = 2,
+						sound = BalatrMod.prefix("demonic"),
 						volume = 5
 					})
-				end,
+				end
 			}
 		end
 	end,

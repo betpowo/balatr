@@ -59,7 +59,7 @@ SMODS.Suit {
 	},
 	pools = {['BalatrPool'] = true},
 	in_pool = function(self, args)
-		return BalatrMod.has_blorbs()
+		return BalatrMod.has_blorbs() and (args and (not args.initial_deck) or true)
 	end
 }
 

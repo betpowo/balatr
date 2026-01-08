@@ -10,6 +10,34 @@ SMODS.Atlas {
 
 
 local jokers = {
+		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'balatr',
+		x = 8,
+		name = 'Balatr',
+		text = {
+			"Will send you to",
+			"the title screen",
+		},
+		rarity = 1,
+		cost = 1,
+		calculate = function(self, card, context)
+			G.E_MANAGER:add_event(Event({
+				delay = 0.1,
+				blockable = false,
+				func = function()
+					G:delete_run()
+					G:main_menu('splash')
+					return true;
+				end
+			}))
+			return {
+				message = 'mfw'
+			}
+		end
+	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -159,7 +187,7 @@ local jokers = {
 		end,
 		post_setup = function(self)
 			-- compatibility with yahimod......i love yahimod
-			self.pools = { ["Cat"] = true }
+			self.pools["Cat"] = true
 			SMODS.Sound {
 				key = 'whatsapp',
 				path = 'whatsapp.ogg',
@@ -218,84 +246,6 @@ local jokers = {
 					Xmult_mod = card.ability.extra.Xmult,
 					message = localize { type = 'variable', key = 'a_xmult', vars = { card.ability.extra.Xmult } }
 				}
-			end
-		end
-	},
-	---------------------------------------------------------------------------
-	---------------------------------------------------------------------------
-	---------------------------------------------------------------------------
-	{
-		id = 'balatr',
-		x = 8,
-		name = 'Balatr',
-		text = {
-			"Will send you to",
-			"the title screen",
-		},
-		rarity = 1,
-		cost = 1,
-		calculate = function(self, card, context)
-			G.E_MANAGER:add_event(Event({
-				delay = 0.1,
-				blockable = false,
-				func = function()
-					G:delete_run()
-					G:main_menu('splash')
-					return true;
-				end
-			}))
-			return {
-				message = 'mfw'
-			}
-		end
-	},
-	---------------------------------------------------------------------------
-	---------------------------------------------------------------------------
-	---------------------------------------------------------------------------
-	{
-		id = 'jimbius',
-		x = 9,
-		name = "{C:mult}Demonic Warrior Jimbius{}",
-		text = {
-			"{C:inactive}(Age: 16) (Personality: Dangerous){}",
-			"Destroy all other jokers.",
-			"With each played hand, increase {C:attention}Blood Fury{}.",
-			"At {C:attention}666{} Blood Fury, gain {C:mult}+#1#{} Mult and a stack",
-			"of {C:dark_edition}Nightmare Demon Mode Tokens{}. At {C:attention}666{}",
-			"Nightmare Demon Mode Tokens {C:inactive}(NDMT){}, gain",
-			"{X:mult,C:white}X#2#{} Mult and activate {C:hearts,E:1}Whirlpool of Destruction{}.",
-			"{C:hearts,E:1}Whirlpool of Destruction{} deletes all cards in your",
-			"hand but adds a {C:dark_edition}Demonic Energy Filter{} to all future drawn cards",
-			"-----",
-			"{C:inactive}Blood Fury{}: {C:attention}#3#{} | {C:dark_edition}NDMT{}: {C:attention}#4#{}"
-		},
-		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 6, ndmt_whirl = 6, whirlpool = false } },
-		loc_vars = function(self, info_queue, card)
-			return { vars = { card.ability.extra.mult, card.ability.extra.Xmult, card.ability.extra.blood_fury, card.ability.extra.ndmt } }
-		end,
-		cost = 6,
-		rarity = 3,
-		calculate = function(self, card, context)
-			if context.joker_main then
-				local x = card.ability.extra -- not writing all that
-				x.blood_fury = x.blood_fury + 1
-				if x.blood_fury < x.hands_fury then
-					return {
-						message = "+1 Blood Fury!"
-					}
-				else
-					x.ndmt = x.ndmt + 64
-					if x.ndmt < x.ndmt_whirl then
-						return {
-							mult_mod = x.mult,
-							message = localize { type = 'variable', key = 'a_mult', vars = { x.mult } } .. ' | +64 NDMT!'
-						}
-					end
-					return {
-						Xmult_mod = x.Xmult,
-						message = localize { type = 'variable', key = 'a_Xmult', vars = { x.Xmult } }
-					}
-				end
 			end
 		end
 	},
@@ -739,6 +689,163 @@ local jokers = {
 			end
 		end
 	},
+		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'jimbius',
+		x = 9,
+		name = "{C:mult}Demonic Warrior Jimbius{}",
+		text = {
+			"{C:inactive}(Age: 16) (Personality: Dangerous){}",
+			"Destroy all other jokers.",
+			"With each played hand, increase {V:1,E:"..BalatrMod.prefix('shake').."}Blood Fury{}.",
+			"At {V:1,E:"..BalatrMod.prefix('shake').."}#5#{} Blood Fury, gain {C:mult}+#1#{} Mult and a stack",
+			"of {C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{}. At {C:attention}#6#{}",
+			"{C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{} {C:inactive}(NDMT){}, gain",
+			"{X:mult,C:white}X#2#{} Mult and activate {C:hearts,E:1}Whirlpool of Destruction{}.",
+			"{C:hearts,E:1}Whirlpool of Destruction{} deletes all cards in your",
+			"hand but adds a {C:dark_edition}Demonic Energy Filter{} to all",
+			"future drawn cards {C:inactive}(during a Blind){}",
+			"{C:inactive}(Currently {}{V:1,E:"..BalatrMod.prefix('shake').."}#3#{}{C:inactive} Blood Fury, {C:"..BalatrMod.prefix('e_mult').."}#4#{} {C:inactive}NDMT,{}",
+			"{C:inactive}(Whirlpool: {}{V:2,E:1}#7#{}{C:inactive}){}"
+		},
+		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 6, ndmt_whirl = 6, whirlpool = false } },
+		loc_vars = function(self, info_queue, card)
+			info_queue[#info_queue+1] = G.P_CENTERS['e_'..BalatrMod.prefix('demonic')]
+			return { vars = {
+				card.ability.extra.mult,
+				card.ability.extra.Xmult,
+				card.ability.extra.blood_fury,
+				card.ability.extra.ndmt,
+				card.ability.extra.hands_fury,
+				card.ability.extra.ndmt_whirl,
+				card.ability.extra.whirlpool and 'Active' or 'Inactive',
+				colours = {
+					HEX('990033'),
+					card.ability.extra.whirlpool and G.C.GREEN or G.C.RED
+				}
+			} }
+		end,
+		cost = 6,
+		rarity = 3,
+		calculate = function(self, card, context)
+			local x = card.ability.extra -- not writing all that
+			if context.joker_main then
+				x.blood_fury = x.blood_fury + 1
+				if x.blood_fury < x.hands_fury then
+					return {
+						message = "+1",
+						colour = HEX('990033'),
+					}
+				else
+					x.ndmt = x.ndmt + 64
+					if x.ndmt < x.ndmt_whirl then
+						return {
+							mult_mod = x.mult,
+							func = function()
+								card_eval_status_text(card, 'jokers', nil, nil, nil, {
+									message = localize { type = 'variable', key = 'a_mult', vars = { x.mult } },
+									colour = G.C.MULT,
+								})
+								card_eval_status_text(card, 'jokers', nil, nil, nil, {
+									message = '+64 NDMT',
+									colour = HEX('990033'),
+								})
+							end
+						}
+					end
+					return {
+						Xmult_mod = x.Xmult,
+						message = localize { type = 'variable', key = 'a_xmult', vars = { x.Xmult } }
+					}
+				end
+			end
+			if context.after then
+				if not x.whirlpool then
+					x.whirlpool = true
+					return {
+						func = function()
+							G.E_MANAGER:add_event(Event({
+								trigger = 'after',
+								blockable = true,
+								delay = 1,
+								func = function()
+									G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                					    play_sound('tarot2', 0.76, 0.4);return true end}))
+                					play_sound('tarot2', 1, 0.4)
+									card:juice_up()
+									ease_background_colour{new_colour = G.C.BLACK, contrast = 0}
+									return true
+								end
+							}))
+							for i = 1, 6 do
+								G.E_MANAGER:add_event(Event({
+									trigger = 'after',
+									blockable = true,
+									delay = 0.75,
+									func = function()
+										-- "pitch cannot be negative" sybau
+										G.PITCH_MOD = math.max(0, G.PITCH_MOD - (0.05 * i))
+										card:flip()
+										play_sound('cardSlide2', 0.5 + ((i - 1) * 0.15), i * 0.25)
+										return true
+									end
+								}))
+							end
+							G.E_MANAGER:add_event(Event({
+								trigger = 'after',
+								blockable = true,
+								func = function()
+									card:juice_up(1, 3)
+									G.PITCH_MOD = 0
+									G.ROOM.jiggle = G.ROOM.jiggle + 6
+									BalatrMod.flashbang_level = 0.5
+									play_sound('talisman_emult')
+									ease_background_colour{new_colour = G.C.BLACK, special_colour = G.C.RED, contrast = 6}
+									if not G.SETTINGS.reduced_motion then
+										G.ARGS.spin.amount = 6
+									end
+									local destroyed_cards = {}
+									for k, v in pairs(G.hand.cards) do
+										destroyed_cards[#destroyed_cards + 1] = v
+										v:juice_up(0.3, 0.3)
+                						if SMODS.shatters(v) then
+                						    v:shatter()
+                						else
+                						    v:start_dissolve()
+                						end
+									end
+									if destroyed_cards[1] then
+										SMODS.calculate_context({remove_playing_cards = true, removed = destroyed_cards})
+									end
+									return true
+								end
+							}))
+							card_eval_status_text(card, 'jokers', nil, 1, nil, {
+								message = 'Whirlpool Activated!',
+								colour = G.C.SUITS['Hearts'],
+								delay = 2,
+								sound = BalatrMod.prefix("demonic"),
+								volume = 5
+							})
+						end
+					}
+				end
+			end
+			if context.hand_drawn then -- during a blind
+				return {
+					func = function()
+						for k, v in pairs(context.hand_drawn) do
+							if not (v.edition and v.edition[BalatrMod.prefix('demonic')]) then
+								v:set_edition('e_'..BalatrMod.prefix('demonic'))
+							end
+						end
+					end
+				}
+			end
+		end
+	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -808,7 +915,7 @@ local jokers = {
 		soul_pos = {x = 0, y = 2},
 		name = ':tiny:',
 		text = {
-			"Be able to play",
+			"Be able to select",
 			"{C:"..BalatrMod.prefix('rainbow').."}+#1#{} more card"
 		},
 		rarity = 4,
@@ -881,6 +988,7 @@ for k, i in ipairs(jokers) do
 		config = i.config,
 		unlocked = true,
     	discovered = i.discovered or true,
+		pools = i.pools or {},
 
 		-- unsafe (?) params
 		calculate = i.calculate
