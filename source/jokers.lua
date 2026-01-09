@@ -698,19 +698,19 @@ local jokers = {
 		name = "{C:mult}Demonic Warrior Jimbius{}",
 		text = {
 			"{C:inactive}(Age: 16) (Personality: Dangerous){}",
-			"Destroy all other jokers.",
+			--"Destroy all other jokers.", --maybe some other time
 			"With each played hand, increase {V:1,E:"..BalatrMod.prefix('shake').."}Blood Fury{}.",
 			"At {V:1,E:"..BalatrMod.prefix('shake').."}#5#{} Blood Fury, gain {C:mult}+#1#{} Mult and a stack",
-			"of {C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{}. At {C:attention}#6#{}",
-			"{C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{} {C:inactive}(NDMT){}, gain",
+			"of {C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{}. At {C:"..BalatrMod.prefix('e_mult').."}#6#{}",
+			"Nightmare Demon Mode Tokens {C:inactive}(NDMT){}, gain",
 			"{X:mult,C:white}X#2#{} Mult and activate {C:hearts,E:1}Whirlpool of Destruction{}.",
 			"{C:hearts,E:1}Whirlpool of Destruction{} deletes all cards in your",
 			"hand but adds a {C:dark_edition}Demonic Energy Filter{} to all",
 			"future drawn cards {C:inactive}(during a Blind){}",
-			"{C:inactive}(Currently {}{V:1,E:"..BalatrMod.prefix('shake').."}#3#{}{C:inactive} Blood Fury, {C:"..BalatrMod.prefix('e_mult').."}#4#{} {C:inactive}NDMT,{}",
+			"{C:inactive}(Currently {}{V:1,E:"..BalatrMod.prefix('shake').."}#3#{}{C:inactive} Blood Fury, {C:"..BalatrMod.prefix('e_mult').."}#4#{} {C:inactive}NDMT){}",
 			"{C:inactive}(Whirlpool: {}{V:2,E:1}#7#{}{C:inactive}){}"
 		},
-		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 666, ndmt_whirl = 666, whirlpool = false } },
+		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 666, ndmt_whirl = 666, whirlpool = false, __whirlpool_message = false } },
 		loc_vars = function(self, info_queue, card)
 			info_queue[#info_queue+1] = G.P_CENTERS['e_'..BalatrMod.prefix('demonic')]
 			return { vars = {
@@ -729,6 +729,27 @@ local jokers = {
 		end,
 		cost = 6,
 		rarity = 3,
+		-- ok MAYYYBE i shouldnt be doing this on draw????
+		draw = function(self, card, layer)
+			if (not card.children.particles) and card.ability.extra.__whirlpool_message then
+				card.children.particles = Particles(0, 0, 0,0, {
+    			    timer = 0.03,
+    			    scale = 0.4,
+    			    speed = 3,
+    			    lifespan = 1,
+    			    attach = card,
+    			    colours = {G.C.RED, G.C.ORANGE, G.C.BLACK},
+    			    fill = true
+    			})
+    			card.children.particles.static_rotation = true
+    			card.children.particles:set_role {
+    			    role_type = 'Minor',
+    			    xy_bond = 'Weak',
+    			    r_bond = 'Strong',
+    			    major = card,
+    			}
+			end
+		end,
 		calculate = function(self, card, context)
 			local x = card.ability.extra -- not writing all that
 			if context.joker_main then
@@ -761,7 +782,7 @@ local jokers = {
 					}
 				end
 			end
-			if context.after then
+			if context.after and x.ndmt >= x.ndmt_whirl then
 				if not x.whirlpool then
 					x.whirlpool = true
 					return {
@@ -797,6 +818,7 @@ local jokers = {
 								trigger = 'after',
 								blockable = true,
 								func = function()
+									card.ability.extra.__whirlpool_message = true
 									card:juice_up(1, 3)
 									G.PITCH_MOD = 0
 									G.ROOM.jiggle = G.ROOM.jiggle + 6
@@ -833,7 +855,7 @@ local jokers = {
 					}
 				end
 			end
-			if context.hand_drawn then -- during a blind
+			if context.hand_drawn and card.ability.extra.whirlpool then -- during a blind
 				return {
 					func = function()
 						for k, v in pairs(context.hand_drawn) do
@@ -904,6 +926,115 @@ local jokers = {
 					}))
 				end
         	end
+		end
+	},
+		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'placeholder_name_1',
+		y = 1, x = 4,
+		soul_pos = {x = 5, y = 1},
+		name = '???',
+		text = {
+			"Be able to {C:red}discard{} and draw",
+			"{C:"..BalatrMod.prefix('rainbow').."}new{} cards in {C:attention}Booster{} Packs",
+			"{C:inactive}({}{C:red}Discarded{}{C:inactive} cards will be moved",
+			"{C:inactive}to {C:attention}top{}{C:inactive} of the deck and {C:"..BalatrMod.prefix('rainbow').."}new",
+			"{C:inactive}cards will be picked from the {C:attention}bottom{C:inactive})"
+		},
+		rarity = 4,
+		cost = 10,
+		config = { },
+		--[[
+			"why joker, and not voucher??"
+			with the currently implemented legendary jokers as of writing (idk, :tiny:),
+			iv enoticed they both break the game requiring you to keep them
+			so i wanted to do another one. lmao
+		]]
+		calculate = function(self, card, context)
+			if (context.open_booster or context.ending_booster) and G[BalatrMod.prefix('discard_pack')] then
+				G[BalatrMod.prefix('discard_pack')]:remove()
+				G[BalatrMod.prefix('discard_pack')] = nil
+			end
+			if context.other_drawn and not G[BalatrMod.prefix('discard_pack')] then
+				local text_scale = 0.45
+    			local button_height = 1.3
+				local butt = {n=G.UIT.C, config={id = 'discard_button',align = "tm", padding = 0.3, r = 0.1, minw = 2.5, minh = button_height, hover = true, colour = G.C.RED, button = BalatrMod.prefix('discard_cards_in_pack'), shadow = true, func = BalatrMod.prefix('can_discard_in_pack')}, nodes={
+    			  {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
+    			      {n=G.UIT.T, config={text = localize('k_reroll'), scale = text_scale, colour = G.C.UI.TEXT_LIGHT, focus_args = {button = 'y', orientation = 'bm'}, func = 'set_button_pip'}}
+    			  }},
+    			  {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
+    			      {n=G.UIT.T, config={ref_table = SMODS.hand_limit_strings, ref_value = 'discard', scale = text_scale * 0.65, colour = G.C.UI.TEXT_LIGHT}}
+    			  }},
+    			}}
+				G[BalatrMod.prefix('discard_pack')] = UIBox {
+					definition = butt,
+					config = {
+        				align = 'tr',
+						offset = {x = 0.9, y = -3},
+        				major = G.hand
+					}
+				}
+        	end
+		end,
+		post_setup = function(self)
+			G.FUNCS[BalatrMod.prefix('can_discard_in_pack')] = function(e)
+				if G.GAME.current_round.discards_left <= 0 or #G.hand.highlighted <= 0 or #G.hand.highlighted > math.max(G.GAME.starting_params.discard_limit, 0) then 
+					e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+					e.config.button = nil
+				else
+					e.config.colour = G.C.RED
+					e.config.button = BalatrMod.prefix('discard_cards_in_pack')
+				end
+			end
+			G.FUNCS[BalatrMod.prefix('discard_cards_in_pack')] = function(e, hook)
+				if not BalatrMod.__reroll_helper_var then
+					BalatrMod.__reroll_helper_var = true
+				else return end
+				local prev_state = G.STATE
+				
+				stop_use()
+    			G.CONTROLLER.interrupt.focus = true
+    			G.CONTROLLER:save_cardarea_focus('hand')
+
+    			for k, v in ipairs(G.playing_cards) do
+    			    v.ability.forced_selection = nil
+    			end
+			
+    			if G.CONTROLLER.focused.target and G.CONTROLLER.focused.target.area == G.hand then G.card_area_focus_reset = {area = G.hand, rank = G.CONTROLLER.focused.target.rank} end
+    			local highlighted_count = math.min(#G.hand.highlighted, G.discard.config.card_limit - #G.play.cards)
+    			if highlighted_count > 0 then 
+    			    table.sort(G.hand.highlighted, function(a,b) return a.T.x < b.T.x end)
+    			    for i=1, highlighted_count do
+    			    	draw_card(G.hand, G.deck, i*100/highlighted_count, 'down', false, G.hand.highlighted[i])
+					end
+					delay(0.3) -- this is why i cant use the same loop for the bottom one
+					for i=1, highlighted_count do
+						G.E_MANAGER:add_event(Event({
+            			    func = function()
+								draw_card(G.deck, G.hand, i*100/highlighted_count, 'up', true, G.deck.cards[#G.deck.cards - i])
+            			        return true
+            			    end
+            			}))
+    			    end
+    			end
+
+				if not hook then
+            		if G.GAME.modifiers.discard_cost then
+            		    ease_dollars(-G.GAME.modifiers.discard_cost)
+            		end
+					--G.STATE = G.STATES[BalatrMod.prefix('DRAW_TO_HAND_FROM_BOOSTER')]
+            		G.E_MANAGER:add_event(Event({
+            		    trigger = 'immediate',
+            		    func = function()
+            		        G.STATE = prev_state
+							BalatrMod.__reroll_helper_var = nil
+            		        return true
+            		    end
+            		}))
+        		end
+			end
 		end
 	},
 	---------------------------------------------------------------------------
