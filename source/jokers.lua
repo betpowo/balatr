@@ -932,13 +932,13 @@ local jokers = {
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
-		id = 'placeholder_name_1',
-		y = 1, x = 4,
-		soul_pos = {x = 5, y = 1},
-		name = '???',
+		id = 'c_',
+		y = 2, x = 1,
+		soul_pos = {x = 2, y = 2},
+		name = 'c_',
 		text = {
-			"Be able to {C:red}discard{} and draw",
-			"{C:"..BalatrMod.prefix('rainbow').."}new{} cards in {C:attention}Booster{} Packs",
+			"Be able to {C:"..BalatrMod.prefix('rainbow').."}reroll{} cards",
+			"in {C:attention}Booster{} Packs",
 			"{C:inactive}({}{C:red}Discarded{}{C:inactive} cards will be moved",
 			"{C:inactive}to {C:attention}top{}{C:inactive} of the deck and {C:"..BalatrMod.prefix('rainbow').."}new",
 			"{C:inactive}cards will be picked from the {C:attention}bottom{C:inactive})"
@@ -962,7 +962,15 @@ local jokers = {
     			local button_height = 1.3
 				local butt = {n=G.UIT.C, config={id = 'discard_button',align = "tm", padding = 0.3, r = 0.1, minw = 2.5, minh = button_height, hover = true, colour = G.C.RED, button = BalatrMod.prefix('discard_cards_in_pack'), shadow = true, func = BalatrMod.prefix('can_discard_in_pack')}, nodes={
     			  {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
-    			      {n=G.UIT.T, config={text = localize('k_reroll'), scale = text_scale, colour = G.C.UI.TEXT_LIGHT, focus_args = {button = 'y', orientation = 'bm'}, func = 'set_button_pip'}}
+    			      {n=G.UIT.O, id='reroll_text', config = {
+							object = DynaText({
+								string = localize('k_reroll'),
+								silent = true,
+								scale = text_scale,
+								colours = {G.C.UI.TEXT_LIGHT},
+								float = true
+							}),
+						focus_args = {button = 'y', orientation = 'bm'}, func = 'set_button_pip'}}
     			  }},
     			  {n=G.UIT.R, config={align = "cm", padding = 0}, nodes={
     			      {n=G.UIT.T, config={ref_table = SMODS.hand_limit_strings, ref_value = 'discard', scale = text_scale * 0.65, colour = G.C.UI.TEXT_LIGHT}}
@@ -980,11 +988,11 @@ local jokers = {
 		end,
 		post_setup = function(self)
 			G.FUNCS[BalatrMod.prefix('can_discard_in_pack')] = function(e)
-				if G.GAME.current_round.discards_left <= 0 or #G.hand.highlighted <= 0 or #G.hand.highlighted > math.max(G.GAME.starting_params.discard_limit, 0) then 
+				if BalatrMod.__reroll_helper_var or G.GAME.current_round.discards_left <= 0 or #G.hand.highlighted <= 0 or #G.hand.highlighted > math.max(G.GAME.starting_params.discard_limit, 0) then 
 					e.config.colour = G.C.UI.BACKGROUND_INACTIVE
 					e.config.button = nil
 				else
-					e.config.colour = G.C.RED
+					e.config.colour = SMODS.Gradients[BalatrMod.prefix('rainbow')] -- why cant i use G.C :sob:
 					e.config.button = BalatrMod.prefix('discard_cards_in_pack')
 				end
 			end

@@ -76,7 +76,7 @@ SMODS.Gradient {
 	key = 'rainbow',
 	cycle = 5,
 	interpolation = 'linear',
-	colours = {G.C.RED,G.C.FILTER,G.C.GREEN,G.C.BLUE,G.C.PURPLE,HEX('fa44f9')}
+	colours = {G.C.RED,G.C.FILTER,G.C.GREEN,G.C.BLUE,HEX('9300de'),HEX('e83389')}
 }
 
 -- why is this not documented???
