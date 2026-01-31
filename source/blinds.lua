@@ -44,7 +44,7 @@ local blinds = {
 			G.hand.config[BalatrMod.prefix('real_high_limit')] = G.hand.config.highlighted_limit
 			G.hand.config.highlighted_limit = #G.hand.cards
     	    for i = 1, #G.hand.cards do
-    	        if (G.hand.cards[i].base.nominal <= 5) and not SMODS.has_enhancement(G.hand.cards[i], 'm_stone') then
+    	        if SMODS.has_no_rank(G.hand.cards[i]) and (G.hand.cards[i].base.nominal <= 5) then
     	            local _selected_card = G.hand.cards[i]
 					table.insert(cards_selected, _selected_card)
     	            G.hand:add_to_highlighted(_selected_card, true)
@@ -71,7 +71,7 @@ local blinds = {
 			if G.GAME.blind.disabled then return false end
     	    local broke = false
     	    for i = 1, #G.play.cards do
-    	        if (G.play.cards[i].base.nominal <= 5) and not SMODS.has_enhancement(G.play.cards[i], 'm_stone') then
+    	        if SMODS.has_no_rank(G.hand.cards[i]) and (G.hand.cards[i].base.nominal <= 5) then
     	            broke = true
     	        end
     	    end
@@ -82,7 +82,7 @@ local blinds = {
     	end,
 		in_pool = function(self)
 			-- instant game over since every card in deck at start is 5 and lower
-			return next(SMODS.find_mod("UnStable")) and G.GAME.selected_back.name ~= 'b_unstb_lowkey'
+			return G.GAME.selected_back.name ~= 'b_unstb_lowkey'
 		end
 	},
 	{
@@ -148,6 +148,188 @@ local blinds = {
 		end,
 	},
 	{
+		id = 'conveyor',
+		name = 'The Conveyor',
+		boss_colour = '8878B4',
+		text = {
+			"Hand rotates to the left"
+		},
+		update = function(self, blind, dt)
+			local beat = ((BalatrMod.music_time or 0) * ((150 * 0.7) / 60))
+			local target_value = math.floor(beat / 2)
+
+			if self.tracked_beat ~= target_value then
+				self.tracked_beat = target_value
+				blind:juice_up()
+				if G.STATE == G.STATES.SELECTING_HAND or G.STATE == G.STATES.HAND_PLAYED then
+					local first_card = G.hand.cards[1]
+					table.remove(G.hand.cards, 1)
+					table.insert(G.hand.cards, #G.hand.cards + 1, first_card)
+					play_sound('cardSlide1', 0.8, 0.4)
+				end
+			end
+		end,
+		post_setup = function(self)
+			self.tracked_beat = -1
+		end
+	},
+	{
+		id = 'ceiling',
+		name = 'The Ceiling',
+		boss_colour = 'A87853',
+		text = {'It says "gullible" on it.'},
+		update = function(self, blind, dt)
+			if blind.triggered or G.STATE == G.STATES.DRAW_TO_HAND then return end
+
+			local w, h, mode = love.window.getMode()
+			local relX = G.CONTROLLER.cursor_position.x / w
+			local relY = G.CONTROLLER.cursor_position.y / h
+
+			if (relX <= 1 / 2) and (relY <= 1 / 10) then
+				blind.triggered = true
+				G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                    play_sound('tarot2', 0.76, 0.4);return true end}))
+                play_sound('tarot2', 1, 0.4)
+				
+				SMODS.juice_up_blind()
+				BalatrMod.pitch_nudge = 10
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.35*G.SETTINGS.GAMESPEED,
+					func = function()
+						G.ROOM.jiggle = G.ROOM.jiggle + 100
+						play_sound('talisman_eeemult')
+						play_sound('talisman_eeemult', 0.25)
+						play_sound('talisman_eeechip')
+						play_sound('talisman_eeechip', 0.5)
+						play_sound(BalatrMod.prefix('ultra_fart'), 1.5, 0.35)
+						play_sound(BalatrMod.prefix('ultra_fart'), 1, 0.5)
+						play_sound(BalatrMod.prefix('ultra_fart'), 0.5, 0.75)
+                    	local destroyed_cards = {}
+						for k, v in pairs(G.deck.cards) do
+							destroyed_cards[#destroyed_cards + 1] = v
+							v:juice_up(0.3, 0.3)
+                			if SMODS.shatters(v) then
+                			    v:shatter()
+                			else
+                			    v:start_dissolve()
+                			end
+						end
+						if destroyed_cards[1] then
+							SMODS.calculate_context({remove_playing_cards = true, removed = destroyed_cards})
+						end
+						return true 
+					end
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.03*G.SETTINGS.GAMESPEED,
+					func = function()
+						G.ROOM.jiggle = G.ROOM.jiggle + 20
+                    	local destroyed_cards = {}
+						for k, v in pairs(G.hand.cards) do
+							destroyed_cards[#destroyed_cards + 1] = v
+							G.E_MANAGER:add_event(Event({
+								trigger = 'after',
+								delay = 0.05*G.SETTINGS.GAMESPEED,
+								blocking = false,
+								func = function()
+									v:juice_up(0.3, 0.3)
+                					if SMODS.shatters(v) then
+                					    v:shatter()
+                					else
+                					    v:start_dissolve()
+                					end
+									SMODS.calculate_context({remove_playing_cards = true, removed = {v}})
+									return true 
+								end
+							}))
+						end
+						return true 
+					end
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.2*G.SETTINGS.GAMESPEED,
+					func = function()
+						G.ROOM.jiggle = G.ROOM.jiggle + 20
+						local destroyed_cards = {}
+						for k, v in pairs(G.consumeables.cards) do
+							destroyed_cards[#destroyed_cards + 1] = v
+							v:juice_up(0.3, 0.3)
+							v:start_dissolve()
+						end
+						if destroyed_cards[1] then
+							SMODS.calculate_context({remove_playing_cards = true, removed = destroyed_cards})
+						end
+						return true 
+					end
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.5*G.SETTINGS.GAMESPEED,
+					func = function()
+						G.ROOM.jiggle = G.ROOM.jiggle + 20
+						for k, v in pairs(G.jokers.cards) do
+							v:shatter()
+						end
+						return true 
+					end
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					func = function()
+						update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {handname=localize('k_all_hands'),chips = '...', mult = '...', level=''})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.2, func = function()
+            play_sound('tarot1')
+            blind.children.animatedSprite:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = true
+            return true end }))
+        update_hand_text({delay = 0}, {mult = '-', StatusText = true})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+            play_sound('tarot1')
+            blind.children.animatedSprite:juice_up(0.8, 0.5)
+            return true end }))
+        update_hand_text({delay = 0}, {chips = '-', StatusText = true})
+        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.9, func = function()
+            play_sound('tarot1')
+            blind.children.animatedSprite:juice_up(0.8, 0.5)
+            G.TAROT_INTERRUPT_PULSE = nil
+            return true end }))
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 0.9, delay = 0}, {level='-400'})
+        delay(1.3)
+        for k, v in pairs(G.GAME.hands) do
+            level_up_hand(self, k, true, -400)
+        end
+        update_hand_text({sound = 'button', volume = 0.7, pitch = 1.1, delay = 0}, {mult = 0, chips = 0, handname = '', level = ''})
+						return true 
+					end
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.5*G.SETTINGS.GAMESPEED,
+					func = function()
+						G.ROOM.jiggle = G.ROOM.jiggle + 20
+						BalatrMod.pitch_nudge = 1
+						G.GAME.blind:disable()
+						end_round()
+						return true 
+					end
+				}))
+			end
+		end,
+		set_blind = function(self)
+			self.title_window = love.window.getTitle()
+			love.window.setTitle('Gullible')
+		end,
+		defeat = function(self)
+			G.GAME.blind:disable()
+		end,
+		disable = function(self)
+			love.window.setTitle(self.title_window)
+		end,
+	},
+	{
 		id = 'gilbert',
 		name = 'gilbert',
 		boss = { showdown = true },
@@ -197,7 +379,10 @@ local blinds = {
 local blind_funcs = {
 	'set_blind', 'calculate', 'disable', 'defeat', 'drawn_to_hand', 'press_play',
 	'recalc_debuff', 'debuff_hand', 'debuff_card', 'stay_flipped', 'modify_hand',
-	'get_loc_debuff_text', 'loc_vars', 'collection_loc_vars', 'in_pool'
+	'get_loc_debuff_text', 'loc_vars', 'collection_loc_vars', 'in_pool',
+
+	-- added by balatr
+	'update'
 }
 for k, i in ipairs(blinds) do
 	local b = {

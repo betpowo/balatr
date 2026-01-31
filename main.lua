@@ -1,8 +1,9 @@
 --print('oh my god bruh')
 
 BalatrMod = {
+	obj = SMODS.current_mod,
 	prefix = function (a)
-		return 'balatr________'..a
+		return BalatrMod.obj.prefix..'_'..a
 	end,
 	is_hand_palindrome = function(cards)
 		if #cards < 5 then return false end
@@ -32,7 +33,8 @@ BalatrMod = {
 			if res then break end
 		end
 		return G.playing_cards and res
-	end
+	end,
+	pitch_nudge = 1,
 }
 
 -- Emult is already added by talisman, so have this so prevent doing Emult ourselves if thats the case
@@ -104,3 +106,18 @@ SMODS.Atlas {
 	px = 32,
 	py = 32
 }
+
+local crochet = (150 * 0.7) / 60
+local numerator = 7 -- 7/4
+local og___Game_update = Game.update
+function Game:update(dt)
+	og___Game_update(self, dt)
+	if BalatrMod.music_time then
+		BalatrMod.music_time = BalatrMod.music_time + (dt * G.PITCH_MOD)
+		--print(math.fmod(BalatrMod.music_time, crochet))
+	end
+	local c = love.thread.getChannel("i_hate_love2d"):pop()
+	if c then
+		BalatrMod.music_time = c
+	end
+end

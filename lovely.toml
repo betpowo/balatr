@@ -9,7 +9,17 @@ priority = 0
 target = "game.lua"
 pattern = "replace_card.states.visible = false"
 position = "after"
-payload = "play_sound(BalatrMod.prefix('ultra_fart')); G.ROOM.jiggle = 9999999999; love.window.setTitle('Balatr');"
+payload = '''
+if change_context == 'splash' then
+    play_sound(BalatrMod.prefix('ultra_fart'))
+    G.ROOM.jiggle = 9999999999
+end
+if not BalatrMod.music_time then
+    BalatrMod.music_time = 0
+    love.window.setTitle('Balatr')
+end
+BalatrMod.pitch_nudge = 1
+'''
 match_indent = true
 
 [[patches]]
@@ -82,17 +92,75 @@ end end
 use =
 '''
 
-# debug
-# [[patches]]
-# [patches.pattern]
-# target = "card.lua"
-# pattern = '''
-# local context_blueprint_card = context.blueprint_card
-# '''
-# position = "after"
-# payload = '''
-# if (self.ability.set == 'Joker') then
-#     print('calculate wasnt overwritten...im here now '..(self.config.key or self.ability.name))
-# end
-# '''
-# match_indent = true
+[[patches]]
+[patches.pattern]
+target = "blind.lua"
+position = "before"
+match_indent = true
+pattern = '''
+function Blind:draw()
+'''
+payload = '''
+function Blind:update(dt)
+  if not self.disabled and not G.SETTINGS.paused then
+    local obj = self.config.blind
+    if obj.update and type(obj.update) == 'function' then
+      obj:update(self, dt)
+    end
+  end
+end
+'''
+
+# i have to do this JUST so i can get the current music time. fuck
+
+[[patches]]
+[patches.pattern]
+target = "engine/sound_manager.lua"
+position = "after"
+match_indent = true
+pattern = '''
+SMODS_Sounds = {}
+'''
+payload = '''
+AWESOME_CHANNEL = love.thread.getChannel("i_hate_love2d")
+--AWESOME_CHANNEL:push('hai :3')
+'''
+
+[[patches]]
+[patches.regex]
+target = "engine/sound_manager.lua"
+position = "after"
+line_prepend = '$indent    '
+pattern = '''
+(?<indent>[\t ]*)RESTART_MUSIC\(.*\)
+'''
+payload = '''
+UPDATE_SONG_TIME()
+'''
+
+[[patches]]
+[patches.pattern]
+target = "engine/sound_manager.lua"
+position = "before"
+match_indent = true
+pattern = '''
+LOAD_CHANNEL:push('finished')
+'''
+payload = '''
+function UPDATE_SONG_TIME()
+  AWESOME_CHANNEL:push((SOURCES["music1"] and SOURCES["music1"][1] and SOURCES["music1"][1].sound)
+  and (SOURCES["music1"][1].sound:tell("seconds") / SOURCES["music1"][1].sound:getPitch()) or 0)
+end
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/misc_functions.lua"
+position = "after"
+match_indent = true
+pattern = '''
+G.PITCH_MOD = (G.PITCH_MOD or 1)*(1 - dt) + dt*((not G.normal_music_speed and G.STATE == G.STATES.GAME_OVER) and 0.5 or 1)
+'''
+payload = '''
+* BalatrMod.pitch_nudge
+'''

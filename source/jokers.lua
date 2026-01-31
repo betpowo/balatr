@@ -10,7 +10,7 @@ SMODS.Atlas {
 
 
 local jokers = {
-		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
@@ -23,6 +23,8 @@ local jokers = {
 		},
 		rarity = 1,
 		cost = 1,
+		unlocked =   true,
+		discovered = true,
 		calculate = function(self, card, context)
 			G.E_MANAGER:add_event(Event({
 				delay = 0.1,
@@ -146,11 +148,11 @@ local jokers = {
 						end
 					}))
 					return {
-						message = 'Eaten!'
+						message = localize('k_eaten_ex')
 					}
 				else
 					return {
-						message = '-X1 Mult!',
+						message = localize { type = 'variable', key = 'a_xmult_minus', vars = { 1 } },
 						colour = G.C.MULT
 					}
 				end
@@ -376,7 +378,7 @@ local jokers = {
 			if context.discard and context.other_card and not context.blueprint then
 				if card.ability.extra.c_c < card.ability.extra.max_cards then
 					local oc = context.other_card
-					local chip_mod =  oc.base.nominal + oc.ability.bonus + ((oc.edition and oc.edition.foil) and 50 or 0)
+					local chip_mod =  oc:get_chip_bonus() + ((oc.edition and oc.edition.foil) and 50 or 0)
 					--SMODS.destroy_cards(oc) -- this wont actually remove them for some reason ????
 					card.ability.extra.chips = card.ability.extra.chips + chip_mod
 					card.ability.extra.c_c = card.ability.extra.c_c + 1
@@ -648,7 +650,6 @@ local jokers = {
 			end
 		end,
 		calculate = function(self, card, context)
-			-- TODO.: make talisman a dependency, i dont think i wanna handle exponentials myself
 			if context.joker_main then
 				return {
 					e_chips = card.ability.extra.ec,
@@ -689,7 +690,252 @@ local jokers = {
 			end
 		end
 	},
-		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'duke',
+		name = 'Duke',
+		text = {
+			"{s:0.6,C:inactive}he's in my fucking jokers{}",
+			"{X:chips,C:white}X#1#{} Chips if",
+			"{C:attention}Java{} is installed",
+			"{s:0.8,C:inactive}(requires game restart{}",
+			"{s:0.8,C:inactive}if installing){}",
+		},
+		rarity = 2,
+		cost = 3,
+		config = { extra = { x_chips = 3, active = true } },
+		loc_vars = function(self, info_queue, card)
+			--TODO: actually detect java
+			local active = card.ability.extra.active
+			return { vars = { 
+				card.ability.extra.x_chips
+			}, main_end = {
+                {n=G.UIT.C, config={align = "bm", minh = 0.4}, nodes={
+                    {n=G.UIT.C, config={ref_table = self, align = "m", colour = active and G.C.GREEN or G.C.RED, r = 0.05, padding = 0.06}, nodes={
+                        {n=G.UIT.T, config={text = ' '..localize(active and 'k_active' or 'k_inactive')..' ',colour = G.C.UI.TEXT_LIGHT, scale = 0.32*0.9}},
+                    }}
+                }}
+            } }
+		end,
+		calculate = function(self, card, context)
+			if context.joker_main and card.ability.extra.active then
+				return {
+					x_chips = card.ability.extra.x_chips
+				}
+			end
+		end
+
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'admin_card',
+		name = 'Admin Card',
+		y = 2, x = 5,
+		text = {
+			"{X:chips,C:white}X#1#{} Chips",
+			"{C:green}#2# in #3#{} chance to instead {C:red}half{}",
+			"your score and add {C:blue}+#4#{} hand",
+			"{C:red,E:2}self destructs{}",
+			"{C:inactive,s:0.75}(only triggers if score > 0){}"
+		},
+		rarity = 2,
+		cost = 3,
+		config = { extra = { x_chips = 5, chance = 5, hands = 1 } },
+		loc_vars = function(self, info_queue, card)
+			return { vars = { 
+				card.ability.extra.x_chips,
+				G.GAME.probabilities.normal,
+				card.ability.extra.chance,
+				card.ability.extra.hands,
+			} }
+		end,
+		calculate = function(self, card, context)
+			if context.joker_main then
+				card.ability.extra.gonna_do_it = (pseudorandom('among_us_in_real_life') < (G.GAME.probabilities.normal / card.ability.extra.chance)) and (to_big(G.GAME.chips) > to_big(0))
+				if not card.ability.extra.gonna_do_it then return {
+					x_chips = card.ability.extra.x_chips
+				} end
+			end
+			if context.after then
+				if card.ability.extra.gonna_do_it then
+					return {
+						func = function()
+							G.E_MANAGER:add_event(Event({
+							func = function()
+								ease_background_colour{new_colour = lighten(G.C.RED, 0.2), special_colour = darken(G.C.RED, 0.1), contrast = 10}
+								play_sound('chips2')
+								G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+                				    play_sound('tarot2', 0.76, 0.4);return true end}))
+                				play_sound('tarot2', 1, 0.4)
+								play_sound(BalatrMod.prefix('impostor_killMusic'))
+								G.HUD:get_UIE_by_ID('chip_UI_count'):juice_up(0.3, 0.1)
+								G.ROOM.jiggle = G.ROOM.jiggle + 4
+								return true
+							end
+							}))
+							G.E_MANAGER:add_event(Event({
+            				    trigger = 'ease',
+            				    ref_table = G.GAME, ref_value = 'chips',
+            				    ease_to = to_big(G.GAME.chips) / to_big(2),
+            				    delay = 1,
+								func = function(t) return math.floor(t) end
+            				}))
+							card_eval_status_text(card, 'jokers', nil, nil, nil, {
+								message = '>:)',
+								colour = G.C.RED, delay = 2 * G.SETTINGS.GAMESPEED
+							})
+							G.E_MANAGER:add_event(Event({
+							func = function()
+									play_sound('tarot1')
+									card.T.r = -0.2
+									card:juice_up(0.3, 0.4)
+									card.states.drag.is = true
+									card.children.center.pinch.x = true
+									ease_hands_played(card.ability.extra.hands)
+									G.E_MANAGER:add_event(Event({
+										trigger = 'after',
+										delay = 0.3,
+										func = function()
+											G.jokers:remove_card(card)
+											card:remove()
+											card = nil
+											return true;
+										end
+									}))
+									return true
+								end
+							}))
+						end
+					}
+				end
+			end
+		end,
+		post_setup = function(self)
+			SMODS.Sound {
+				key = 'impostor_killMusic',
+				path = 'impostor_killMusic.ogg',
+				pitch = 1
+			}
+		end
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'bunny',
+		name = 'Bouncing Bunny',
+		y = 2, x = 6,
+		text = {
+			"{B:2,V:1}#1##2#{} Chips",
+			"{C:inactive}({}{C:"..BalatrMod.prefix('rainbow')..",E:2}Operator{} {C:inactive}changes each round){}"
+		},
+		rarity = 3,
+		cost = 5,
+		-- colors are functionsly Solely because of gradients. i want them to be animated
+		available_ops = {
+			["+"] = {
+				key = 'chips',
+				sound = 'chips1',
+				weight = 2, -- TODO: make this work
+				bg = function() return G.C.CLEAR end,
+				col = function() return G.C.CHIPS end
+			},
+			["X"] = {
+				key = 'x_chips',
+				sound = 'xchips',
+				weight = 2,
+				bg = function() return G.C.CHIPS end,
+				col = function() return G.C.WHITE end,
+			},
+			["^"] = {
+				key = 'e_chips',
+				sound = 'talisman_echip',
+				bg = function() return G.ARGS.LOC_COLOURS[BalatrMod.prefix('e_chips')] end,
+				col = function() return G.C.WHITE end,
+			},
+			["^^"] = {
+				key = 'ee_chips',
+				sound = 'talisman_eechip',
+				bg = function() return G.ARGS.LOC_COLOURS[BalatrMod.prefix('e_chips')] end,
+				col = function() return G.C.EDITION end,
+			},
+			["^^^"] = {
+				key = 'eee_chips',
+				sound = 'talisman_eeechip',
+				weight = 0.5,
+				bg = function() return G.C.DARK_EDITION end,
+				col = function() return G.ARGS.LOC_COLOURS[BalatrMod.prefix('e_chips')] end,
+			}
+		},
+		config = { extra = { operator = "+", chips = 3 } },
+		loc_vars = function(self, info_queue, card)
+			return { vars = { 
+				card.ability.extra.operator,
+				card.ability.extra.chips,
+				colours = {
+					self.available_ops[card.ability.extra.operator].col(),
+					self.available_ops[card.ability.extra.operator].bg()
+				}
+			} }
+		end,
+		set_sprites = function(self, card, front)
+			if not card.config.center.discovered and not card.bypass_discovery_center then
+				return
+			end
+			card.children.front = Sprite(card.T.x, card.T.y, card.T.w, card.T.h, G.ASSET_ATLAS[BalatrMod.prefix('jokersrealnofake')], {x = 7, y = 2})
+			card.children.front.states.hover = card.states.hover
+			card.children.front.states.click = card.states.click
+			card.children.front.states.drag = card.states.drag
+			card.children.front.states.collide.can = false
+			card.children.front:set_role({major = card, role_type = 'Glued', draw_major = card})
+		end,
+		draw = function(self, card, layer)
+			if card.children.front then
+				-- bounce to bpm
+				local bounce = math.abs(math.sin(((BalatrMod.music_time or 0) * ((150 * 0.7) / 60)) * math.pi))
+				bounce = 1 - math.pow(1 - bounce, 5 / 3)
+				local bounce_offset = bounce * (-4.5 / (G.TILE_H * 2))
+				local pixel = 1 / (G.TILE_H * 2)
+				card.children.front.VT.y = card.children.center.VT.y + (math.floor(bounce_offset / pixel) * pixel)
+			end
+		end,
+		post_setup = function(self, this)
+			self.available_ops = this.available_ops
+		end,
+		calculate = function(self, card, context)
+			if context.joker_main then
+				return {
+					[self.available_ops[card.ability.extra.operator].key] = card.ability.extra.chips,
+				}
+			end
+			if context.end_of_round and context.game_over == false then
+				return {
+					func = function()
+						G.E_MANAGER:add_event(Event {
+							func = function()
+								local ops = {}
+								for k, v in pairs(self.available_ops) do
+									table.insert(ops, k)
+								end
+								card.ability.extra.operator = pseudorandom_element(ops, 'bouncing_bunny')
+								card_eval_status_text(card, 'jokers', nil, nil, nil, {
+									message = card.ability.extra.operator..tostring(card.ability.extra.chips),
+									colour = G.C.DARK_EDITION, sound = self.available_ops[card.ability.extra.operator].sound,
+									volume = 0.4, pitch = 1.7
+								})
+								return true
+							end
+						})
+					end
+				}
+			end
+		end
+	},
+	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
@@ -882,6 +1128,7 @@ local jokers = {
 		},
 		rarity = 4,
 		cost = 10,
+		unlocked = false,
 		config = { extra = { bonuses = {
 			['perma_bonus'] = 'BLUE',
 			['perma_mult'] = 'RED',
@@ -928,7 +1175,7 @@ local jokers = {
         	end
 		end
 	},
-		---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
@@ -945,6 +1192,7 @@ local jokers = {
 		},
 		rarity = 4,
 		cost = 10,
+		unlocked = false,
 		config = { },
 		--[[
 			"why joker, and not voucher??"
@@ -1059,6 +1307,7 @@ local jokers = {
 		},
 		rarity = 4,
 		cost = 10,
+		unlocked = false,
 		config = { extra = { cards = 1 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -1079,6 +1328,146 @@ local jokers = {
 			SMODS.update_hand_limit_text(true, true)
 		end,
 	},
+
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'paradise',
+		name = ' ',
+		text = {
+			"{C:green}#1# in #2#{} chance to",
+			"{C:"..BalatrMod.prefix('rainbow').."}purge{} a random Joker",
+			-- it was gonna do playing cards too but that feels like too much
+			"{C:inactive}(Returns in {}{C:attention}#3# {}{C:inactive}rounds){}"
+		},
+		y = 2, x = 3,
+		soul_pos = {x = 4, y = 2},
+		rarity = 4,
+		cost = 17,
+		unlocked = false,
+		config = { extra = { chance = 17, rounds = 3, rounds_left = 3, joker = nil } },
+		loc_vars = function(self, info_queue, card)
+			local center = G.P_CENTERS[card.ability.extra.joker]
+			return { vars = { 
+				G.GAME.probabilities.normal,
+				card.ability.extra.chance,
+				card.ability.extra.rounds_left
+			}, main_end = {
+                {n=G.UIT.C, config={align = "bm", minh = 0.4}, nodes={
+                    {n=G.UIT.C, config={ref_table = self, align = "m", colour = center and G.C.GREEN or G.C.RED, r = 0.05, padding = 0.06}, nodes={
+                        {n=G.UIT.T, config={text = ' '..(center and localize{type = 'name_text', key = center.key, set = center.set} or localize('k_none'))..' ',colour = G.C.UI.TEXT_LIGHT, scale = 0.32*0.9}},
+                    }}
+                }}
+            } }
+		end,
+		calculate = function(self, card, context)
+			if not card.ability.extra.joker then
+				if context.after then
+					if pseudorandom('betty be like: "im going to finish oc lore!!!" no you wont bitch 😂😂 Procrastination is coming')
+					< (G.GAME.probabilities.normal / card.ability.extra.chance) then
+						-- should i check for clones? i dont think it matters
+						local deletable_jokers = {}
+        				for k, v in pairs(G.jokers.cards) do
+        				    if not SMODS.is_eternal(v)
+							and v.config.center.key ~= card.config.center.key -- do not delete itself
+							then deletable_jokers[#deletable_jokers + 1] = v end
+        				end
+						local chosen_joker = pseudorandom_element(deletable_jokers, pseudoseed('erase_this_joker_from_reality_pls'))
+
+						if not chosen_joker then
+							return
+						end
+
+						local is_eternal = SMODS.is_eternal(chosen_joker)
+
+						if not is_eternal then
+							card_eval_status_text(chosen_joker, 'extra', nil, nil, nil, {
+								message = 'Purged!',
+								colour = G.C.BLACK,
+								sound = 'cancel', delay = 2
+							})
+							G.E_MANAGER:add_event(Event({
+								trigger = "before",
+								delay = 1.0,
+								blocking = true,
+								func = function()
+									local key = chosen_joker.config.center.key
+									G.GAME.banned_keys[key] = true
+									card.ability.extra.joker = key
+
+									play_sound('negative', 0.96)
+									play_sound('crumple'..math.floor(1 + (math.random() * 5)), 1, 2)
+									play_sound('crumple'..math.floor(1 + (math.random() * 5)), 0.7, 2)
+									play_sound('tarot2', 1.4)
+									chosen_joker.states.drag.can = false
+									chosen_joker.area:remove_card(chosen_joker)
+									chosen_joker.T.y = chosen_joker.T.y + 4
+									return true
+								end
+							}))
+
+							G.E_MANAGER:add_event(Event({
+								trigger = "after",
+								delay = 2.0,
+								blocking = false,
+								func = function()
+									chosen_joker:remove()
+									return true 
+								end
+							}))
+						else
+							card_eval_status_text(chosen_joker, 'extra', nil, nil, nil, {
+								message = localize('k_nope_ex'),
+								colour = SMODS.Gradients[BalatrMod.prefix('rainbow')],
+								sound = 'tarot2'
+							})
+						end
+					end
+        		end
+			else
+				if context.setting_blind then
+					card.ability.extra.rounds_left = math.max(0, card.ability.extra.rounds_left - 1)
+					if card.ability.extra.rounds_left > 0 then
+						return {
+							message = tostring(card.ability.extra.rounds_left)
+						}
+					end
+
+					if G.jokers.config.card_count >= G.jokers.config.card_limits.total_slots then
+						return {
+							message = localize('k_no_space_ex')
+						}
+					end
+
+					G.GAME.banned_keys[card.ability.extra.joker] = nil
+					local replica = SMODS.create_card {key = card.ability.extra.joker, edition = 'e_'..BalatrMod.prefix('replica')}
+					replica:add_to_deck()
+            		G.jokers:emplace(replica)
+
+					card.ability.extra.rounds_left = card.ability.extra.rounds
+					card.ability.extra.joker = nil
+					return {
+						message = tostring(card.ability.extra.rounds_left),
+						func = function()
+							G.E_MANAGER:add_event(Event({
+								trigger = "after",
+								blocking = false,
+								func = function()
+									G.PITCH_MOD = math.max(0, G.PITCH_MOD - 0.1717)
+									card_eval_status_text(replica, 'extra', nil, nil, nil, {
+										message = localize('k_copied_ex'), colour = G.C.BLACK,
+									})
+									return true 
+								end
+							}))
+						end
+					}
+				end
+			end
+		end
+	},
+
 	
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -1125,8 +1514,8 @@ for k, i in ipairs(jokers) do
 			return {}
 		end,
 		config = i.config,
-		unlocked = true,
-    	discovered = i.discovered or true,
+		unlocked = i.unlocked or true,
+    	discovered = i.discovered or false,
 		pools = i.pools or {},
 
 		-- unsafe (?) params
@@ -1138,7 +1527,7 @@ for k, i in ipairs(jokers) do
 		end
 	end
 	if i.post_setup ~= nil then
-		i.post_setup(j)
+		i.post_setup(j, i)
 	end
 	SMODS.Joker(j)
 end

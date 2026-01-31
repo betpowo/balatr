@@ -32,7 +32,7 @@ local hands = {
         planet = {
             id = 'earth2',
             name = 'Earth',
-            x = 3
+            x = 0
         }
     },
     {
@@ -55,8 +55,8 @@ local hands = {
             end
         end,
         planet = {
-            name = 'Earth',
-            x = 3
+            name = '???',
+            x = 1
         }
     },
     {
@@ -79,8 +79,8 @@ local hands = {
             end
         end,
         planet = {
-            name = 'Earth',
-            x = 3
+            name = '???',
+            x = 2
         }
     },
     {
@@ -102,7 +102,7 @@ local hands = {
             return parts._all_pairs
         end,
         planet = {
-            name = 'Earth',
+            name = '???',
             x = 3
         }
     },
@@ -126,8 +126,8 @@ local hands = {
             end
         end,
         planet = {
-            name = 'Earth',
-            x = 3
+            name = '???',
+            x = 4
         }
     },
     {
@@ -151,8 +151,50 @@ local hands = {
             end
         end,
         planet = {
+            name = '???',
+            x = 5
+        }
+    },
+    {
+        id = 'six_seven',
+        name = 'No',
+        text = {"What have you done."},
+        chips = 60, mult = -7,
+        l_chips = -7, l_mult = 0.6,
+        order_offset = (60 * 7) + 6,
+        example = {
+            { 'H_2', false },
+            { 'D_4', false },
+            { 'S_6', true },
+            { 'D_7', true },
+            { 'C_9', false },
+        },
+        -- TODO: calculate
+        evaluate = function(parts, hand)
+            if next(hand) then
+                local card_scored = {}
+                local _strush = hand
+                local shit = 2
+                for j = 1, #_strush do
+                    local rank = SMODS.Ranks[_strush[j].base.value]
+                    if ((shit == 2) and (rank.key == '6')) then
+                        shit = shit - 1
+                        table.insert(card_scored, _strush[j])
+                    end
+                    if ((shit == 1) and (rank.key == '7')) then
+                        shit = shit - 1
+                        table.insert(card_scored, _strush[j])
+                    end
+                    --print(j, rank.key, shit)
+                end
+                --print(#card_scored)
+                if #card_scored > 1 then return card_scored end
+            end
+        end,
+        planet = {
+            id = 'earth3',
             name = 'Earth',
-            x = 3
+            x = 6
         }
     },
 }

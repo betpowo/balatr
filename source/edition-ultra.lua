@@ -1,5 +1,3 @@
-local MIN_MULT = 1e255
-
 SMODS.Shader({key = 'ultra', path = 'ultra.fs'})
 SMODS.Sound {
 	key = 'ultra',
