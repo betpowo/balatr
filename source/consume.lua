@@ -65,11 +65,6 @@ local items = {
 		id = 'reciprocal',
 		y = 2, x = 4, 
 		set = 'Spectral',
-		name = 'Reciprocal',
-		text = {
-			"{C:dark_edition}Negative{} Jokers become normal,",
-			"and {C:attention}vice-versa{}"
-		},
 		config = { },
 		cost = 4,
 		loc_vars = function(self, info_queue, card)
@@ -96,12 +91,6 @@ local items = {
 		id = 'outcast',
 		y = 2, x = 4, 
 		set = 'Spectral',
-		name = 'Outcast',
-		text = {
-			"Applies {C:dark_edition}Negative{} to",
-			"{C:attention}#1#{} selected playing card,",
-			"{C:red}Halves{} your money"
-		},
 		config = {max_highlighted = 1},
 		cost = 4,
 		loc_vars = function(self, info_queue, card)
@@ -143,12 +132,6 @@ local items = {
 		id = 'nebula',
 		y = 2, x = 2,
 		set = 'Tarot',
-		name = 'Nebula',
-		text = {
-			"Converts up to",
-            "{C:attention}#1#{} selected cards",
-            "to {C:"..BalatrMod.prefix('blorbs').."}Blorbs{}",
-		},
 		config = {suit_conv = BalatrMod.prefix('Blorbs'), max_highlighted = 3},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -168,11 +151,6 @@ local items = {
 		id = 'towel',
 		y = 2, x = 2,
 		set = 'Tarot',
-		name = 'The Towel',
-		text = {
-			"Adds a random {C:attention}enhancement{}",
-			"to {C:attention}#1#{} selected cards"
-		},
 		config = {max_highlighted = 2},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -229,11 +207,6 @@ local edible_consumables = {
 	{
 		id = 'food_apple',
 		y = 1, x = 1,
-		name = 'Apple',
-		text = {
-			"Adds {C:chips}+#1#{} Chips to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 3, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -269,11 +242,6 @@ local edible_consumables = {
 	{
 		id = 'food_orange',
 		y = 1, x = 2,
-		name = 'Orange',
-		text = {
-			"Adds {C:mult}+#1#{} Mult to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 1, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -309,11 +277,6 @@ local edible_consumables = {
 	{
 		id = 'food_lemon',
 		y = 1, x = 3,
-		name = 'Lemon',
-		text = {
-			"Adds {X:chips,C:white}X#1#{} Chips to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 0.1, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -349,11 +312,6 @@ local edible_consumables = {
 	{
 		id = 'food_lime',
 		y = 1, x = 4,
-		name = 'Lime',
-		text = {
-			"Adds {X:mult,C:white}X#1#{} Mult to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 0.1, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -389,11 +347,6 @@ local edible_consumables = {
 	{
 		id = 'food_choco_ball',
 		y = 1, x = 5,
-		name = 'Chocolate Ball',
-		text = {
-			"Adds {C:money}$#1#{} on scoring to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 1, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -429,11 +382,6 @@ local edible_consumables = {
 	{
 		id = 'food_chip',
 		y = 1, x = 6,
-		name = 'Potato Chip',
-		text = {
-			"Adds {C:"..BalatrMod.prefix('rainbow').."}+#1#{} to",
-			"current {C:attention}round{} score"
-		},
 		config = {extra = {inc = 3, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -500,11 +448,6 @@ local edible_consumables = {
 	{
 		id = 'food_pear',
 		y = 2,
-		name = 'Pear',
-		text = {
-			"Adds {X:mult,C:white}X#1#{} {C:attention}held{} Mult to",
-			"{C:attention}#2#{} selected card"
-		},
 		config = {max_highlighted = 1, extra = {inc = 0.25, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {
@@ -540,11 +483,6 @@ local edible_consumables = {
 	{
 		id = 'food_empanada',
 		y = 1, x = 6,
-		name = 'Empanada',
-		text = {
-			"Adds {C:attention}+#1#{} {C:chips}Chips{} or {C:mult}Mult{} to",
-			"{C:attention}#2#{} random cards in hand",
-		},
 		config = {extra = {inc = 5, cards = 3, __uses = 3}},
 		loc_vars = function(self, info_queue, card)
 			return {

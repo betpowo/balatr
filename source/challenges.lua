@@ -1,8 +1,5 @@
 SMODS.Challenge {
 	key = "evil_balatr",
-	loc_txt = {
-		name = "Evil Balatro"
-	},
 	button_colour = HEX('060000'),
 	rules = {
 		modifiers = {
@@ -25,26 +22,14 @@ SMODS.Challenge {
 		}
 	}
 }
--- no lovely patch support wont stop me
-G.localization.misc.v_text.ch_c_inflation[1] = G.localization.misc.v_text.ch_c_inflation[1]:gsub('$1', '$#1#')
---print(G.localization.misc.v_text.ch_c_inflation[1])
-SMODS.process_loc_text(G.localization.misc.v_text, "ch_c_"..BalatrMod.prefix("rental_con"), {
-	key = "ch_c_"..BalatrMod.prefix("rental_con"),
-	name = {
-		'{C:green}1 in 4{} chance for consumables to be {C:attention}Rental{}'
-	},
-}, 'name')
-SMODS.process_loc_text(G.localization.misc.v_text, "ch_c_"..BalatrMod.prefix("rental_con_2"), {
-	key = "ch_c_"..BalatrMod.prefix("rental_con"),
-	name = {
-		'{C:inactive}(cannot be used immediately)'
-	},
-}, 'name')
+
+SMODS.current_mod.process_loc_text = function()
+    -- no lovely patch support wont stop me
+	G.localization.misc.v_text.ch_c_inflation[1] = G.localization.misc.v_text.ch_c_inflation[1]:gsub('$1', '$#1#')
+end
+
 SMODS.Challenge {
 	key = "venezuela",
-	loc_txt = {
-		name = "Venezuela"
-	},
 	rules = {
 		custom = {
 			{id = 'inflation', value = 4},
@@ -91,13 +76,6 @@ G.FUNCS[BalatrMod.prefix('woosh_consumable')] = function(e, mute, nosave)
 	end
 end
 
-
-SMODS.process_loc_text(G.localization.misc.v_text, "ch_c_blorb", {
-	key = "ch_c_blorb",
-	name = {
-		'Start with {C:'..BalatrMod.prefix('blorbs')..'}Blorbs{} only {C:inactive}(i cant ban the default suits :<){}'
-	},
-}, 'name')
 local function get_blorbs()
 	local res = {}
 	for k, v in ipairs({'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'}) do
@@ -111,12 +89,9 @@ end
 SMODS.Challenge {
 	key = "blorb",
 	button_colour = HEX('c561ec'),
-	loc_txt = {
-		name = "Blorb World"
-	},
 	rules = {
 		custom = {
-			{id = 'blorb'},
+			{id = BalatrMod.prefix('blorb')},
 			{id = 'scaling', value = 2},
 		},
 	},
@@ -165,9 +140,6 @@ SMODS.Challenge {
 }
 SMODS.Challenge {
 	key = "suffering",
-	loc_txt = {
-		name = "Suffering from Success"
-	},
 	rules = {
 		custom = {
 			{id = 'scaling', value = 10},

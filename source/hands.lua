@@ -109,7 +109,7 @@ local hands = {
     {
         id = '6oak',
         name = 'Six of a Kind',
-        text = {"6 cards with the same rank"},
+        text = {"6 cards that share the same rank"},
         chips = 160, mult = 20,
         l_chips = 60, l_mult = 4,
         example = {

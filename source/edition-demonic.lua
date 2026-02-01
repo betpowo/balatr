@@ -12,28 +12,12 @@ SMODS.Sound {
     volume = 0.7,
     select_music_track = function()
 		-- die
-        return BalatrMod.demonic_on_screen and
-		not (G.STATE == G.STATES.SHOP
-		and G.STATE == G.STATES.ROUND_EVAL
-		and G.STATE == G.STATES.BUFFOON_PACK
-		and G.STATE == G.STATES.PLANET_PACK)
+        return BalatrMod.demonic_on_screen
 	end,
 }
 SMODS.Edition {
 	key = "demonic",
-	order = 666,
-    loc_txt = {
-        name =  "Demonic Energy Filter",
-        label = "Demonic Energy Filter",
-        text = {
-            "{C:chips}+#1#{} Chips",
-			"{X:chips,C:white}X#2#{} Chips",
-			"{X:"..BalatrMod.prefix('e_chips')..",C:white}^#3#{} Chips",
-			"{C:mult}+#4#{} Mult",
-			"{X:mult,C:white}X#5#{} Mult",
-			"{X:"..BalatrMod.prefix('e_mult')..",C:white}^#6#{} Mult",
-        }
-    },
+	order = 2,
 	weight = 0.6,
 	shader = "demonic",
 	in_shop = true,
@@ -116,7 +100,7 @@ function love.draw()
 end
 local __Card_draw = Card.draw
 function Card.draw(self, layer)
-	local is_demonic = self.edition and self.edition.key == 'e_'..BalatrMod.prefix('demonic') and self.area and self.sprite_facing == 'front'
+	local is_demonic = self.edition and self.edition.key == 'e_'..BalatrMod.prefix('demonic') and (self.area and self.area.T.y < G.TILE_H * 1.3) and self.sprite_facing == 'front'
 	local changeX = (math.random() - 0.5) * 1.75
 	local changeY = (math.random() - 0.5) * 1.75
 	if is_demonic then
@@ -127,8 +111,6 @@ function Card.draw(self, layer)
 	if is_demonic then
 		self.VT.x = self.VT.x - changeX
 		self.VT.y = self.VT.y - changeY
-	end
-	if is_demonic then 
 		BalatrMod.demonic_on_screen = true
 	end
 end

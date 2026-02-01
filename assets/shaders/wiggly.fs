@@ -5,7 +5,7 @@
 #endif
 
 // Look ionized.fs for explanation
-extern PRECISION vec2 replica;
+extern PRECISION vec2 wiggly;
 
 extern PRECISION number dissolve;
 extern PRECISION number time;
@@ -37,35 +37,24 @@ float remapToRange(float value, float start1, float stop1, float start2, float s
 // This is what actually changes the look of card
 vec4 effect( vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords )
 {
-    // Take pixel color (rgba) from `texture` at `texture_coords`, equivalent of texture2D in GLSL
-    vec4 tex = Texel(texture, texture_coords);
-    vec2 pixel = 1.0 / (image_details);
-
     // Position of a pixel within the sprite
-	vec2 uv = (((texture_coords)*(image_details)) - texture_details.xy*texture_details.ba)/texture_details.ba;
-
-
-    number low = min(tex.r, min(tex.g, tex.b));
-    number high = max(tex.r, max(tex.g, tex.b));
-	number delta = high-low -0.1;
-
-    number fac = 0.8 + 0.9*sin(11.*uv.x+4.32*uv.y + replica.r*12. + cos(replica.r*5.3 + uv.y*4.2 - uv.x*4.));
-    number fac2 = 0.5 + 0.5*sin(8.*uv.x+2.32*uv.y + replica.r*5. - cos(replica.r*2.3 + uv.x*8.2));
-    number fac3 = 0.5 + 0.5*sin(10.*uv.x+5.32*uv.y + replica.r*6.111 + sin(replica.r*5.3 + uv.y*3.2));
-    number fac4 = 0.5 + 0.5*sin(3.*uv.x+2.32*uv.y + replica.r*8.111 + sin(replica.r*1.3 + uv.y*11.2));
-    number fac5 = sin(0.9*16.*uv.x+5.32*uv.y + replica.r*12. + cos(replica.r*5.3 + uv.y*4.2 - uv.x*4.));
-
-    number maxfac = 0.7*max(max(fac, max(fac2, max(fac3,0.0))) + (fac+fac2+fac3*fac4), 0.);
+    vec2 tex2 = vec2(texture_coords);
+	vec2 uv_old = (((tex2)*(image_details)) - texture_details.xy*texture_details.ba)/texture_details.ba;
+    vec2 pixel = 1.0 / (image_details);
+    
+    tex2.x += pow((sin((wiggly.y + uv_old.y) * (6.0 + (wiggly.x * 0.01))) / texture_details.b) * 5.0, 3.0) * 5.0;
+    tex2.y += pow((cos((wiggly.y + uv_old.x) * (4.2 + (wiggly.x * 0.01))) / texture_details.a) * 5.0, 3.0) * 5.0;
+    vec2 uv = (((tex2)*(image_details)) - texture_details.xy*texture_details.ba)/texture_details.ba;
+    if (uv != clamp(uv, vec2(0.0), vec2(1.0))) {
+        return vec4(0.0);
+    }
+    // Take pixel color (rgba) from `texture` at `texture_coords`, equivalent of texture2D in GLSL
+    vec4 tex = Texel(texture, tex2);
+    
 
     vec4 hsl = HSL(tex);
-    hsl.x -= ((sin((maxfac * 717.0)) + 1.0) * 0.5) * 0.0171;
-    hsl.y *= 0.6717;
-    hsl.z *= 1.017;
+    hsl.x *= (wiggly.y + (uv_old.y * 4.0)) * 0.3;
     tex = RGB(hsl);
-    number quant = 7.171;
-    tex.rgb -= vec3(1.717 / 255.0);
-    tex.rgb = vec3(floor(tex.rgb * quant)) / quant;
-    tex.rgb -= vec3(maxfac * 0.00717);
 
     return dissolve_mask(tex*colour, texture_coords, uv);
 }

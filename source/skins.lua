@@ -1,7 +1,4 @@
 local FUCK = {'King', 'Queen', 'Jack'}
-local poop = {
-    ['en-us'] = 'Betopia'
-}
 
 for _, i in ipairs({'Spades', 'Hearts', 'Clubs', 'Diamonds'}) do
     local first = i:sub(1, 1)
@@ -33,6 +30,6 @@ for _, i in ipairs({'Spades', 'Hearts', 'Clubs', 'Diamonds'}) do
                 hc_default = true
             }
         },
-        loc_txt = poop
+        loc_txt = 'Betopia'
     }
 end

@@ -5,15 +5,7 @@ end
 SMODS.Shader({key = 'replica', path = 'replica.fs'})
 SMODS.Edition {
 	key = "replica",
-	order = 71,
-    loc_txt = {
-        name =  "Replica",
-        label = "Replica",
-        text = {
-			"{C:white,X:chips}X???{} chips",
-			"{C:inactive,s:0.8}(if destroyed, never comes back)"
-        }
-    },
+	order = 1,
 	weight = -7,
 	shader = "replica",
 	in_shop = false,

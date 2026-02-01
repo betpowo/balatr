@@ -16,11 +16,6 @@ local jokers = {
 	{
 		id = 'balatr',
 		x = 8,
-		name = 'Balatr',
-		text = {
-			"Will send you to",
-			"the title screen",
-		},
 		rarity = 1,
 		cost = 1,
 		unlocked =   true,
@@ -46,15 +41,7 @@ local jokers = {
 	{
 		id = 'jokoj',
 		x = 1,
-		name = 'JokoJ',
-		text = {
-			"{C:inactive}/jo - qwuj/{}",
-			"{C:chips}+#1#{} Chips",
-			"if played hand is",
-			"a {C:attention}palindrome{}",
-			"{C:inactive}(ex: {C:attention}4 3 2 3 4{C:inactive})"
-		},
-		config = { extra = { chips = 250 } },
+		config = { extra = { chips = 80 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.chips } }
 		end,
@@ -74,14 +61,7 @@ local jokers = {
 	{
 		id = 'reker',
 		x = 2,
-		text = {
-			"{C:inactive}/ruh - kur/{}",
-			"{C:mult}+#1#{} Mult",
-			"if played hand is",
-			"a {C:attention}palindrome{}",
-			"{C:inactive}(ex: {C:attention}4 3 2 3 4{C:inactive})"
-		},
-		config = { extra = { mult = 16 } },
+		config = { extra = { mult = 10 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.mult } }
 		end,
@@ -102,11 +82,6 @@ local jokers = {
 		id = 'macaron',
 		x = 3,
 		pixel_size = { w = 61, h = 40 },
-		text = {
-			"mmm...macaron",
-			"{X:mult,C:white}X#1#{} Mult",
-            "{C:mult}-1{} at end of round",
-		},
 		config = { extra = { Xmult = 4 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.Xmult } }
@@ -165,12 +140,6 @@ local jokers = {
 	{
 		id = 'gato',
 		x = 4,
-		name = 'El Gato Balatro',
-		text = {
-			"{C:chips}+#1#{} Chips",
-			"for every {C:diamonds}Diamond{} card",
-			"played, also plays a sound"
-		},
 		config = { extra = { chips = 25 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -203,11 +172,6 @@ local jokers = {
 	{
 		id = 'super_f',
 		x = 5,
-		name = "SUPER F",
-		text = {
-			"Each played {C:attention}2{} gives",
-			"{C:mult}+#1#{} Mult when scored",
-		},
 		config = { extra = { mult = 1 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.mult } }
@@ -229,10 +193,6 @@ local jokers = {
 		id = 'fuck_you',
 		x = 6,
 		soul_pos = {x = 7, y = 0},
-		name = 'FUCK YUO',
-		text = {
-			"{X:mult,C:white}X#1#{} Mult",
-		},
 		config = { extra = { Xmult = -2 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { card.ability.extra.Xmult } }
@@ -257,12 +217,6 @@ local jokers = {
 	{
 		id = 'slothful',
 		y = 1,
-		name = 'Slothful Joker',
-		text = {
-			"Played cards with",
-			"{C:"..BalatrMod.prefix('blorbs').."}Blorb{} suit give",
-			"{C:mult}+#1#{} Mult when scored"
-		},
 		config = { extra = { mult = 3 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -288,12 +242,6 @@ local jokers = {
 	{
 		id = 'gambler',
 		y = 1, x = 1,
-		name = 'Gambler',
-		text = {
-			"{X:mult,C:white}X#1#{} Mult and {C:money}$#3#",
-			"on a {C:chips,E:2}certain condition,",
-			"{X:mult,C:white}X#2#{} Mult and {C:red}-$#4#{} otherwise",
-		},
 		config = { extra = { xmult = 7, xmult2 = 0.7, moola = 77, moola2 = 1 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -322,7 +270,7 @@ local jokers = {
 						G.E_MANAGER:add_event(Event({
 							func = function()
 								card_eval_status_text(card, 'extra', nil, nil, nil, {
-									message = 'Jackpot!', colour = G.C.GOLD,
+									message = localize('k_'..BalatrMod.prefix('jackpot_ex')), colour = G.C.GOLD,
 									sound = 'xchips', instant = true, pitch = 2
 								})
 								play_sound(BalatrMod.prefix('slots'), 1, 0.6)
@@ -349,14 +297,6 @@ local jokers = {
 	{
 		id = 'gc',
 		y = 1, x = 2,
-		name = 'Garbage Collector',
-		text = {
-			"Destroys up to {C:attention}#1#{} {C:inactive}(#3#){}",
-			"{C:red}discarded{} cards per round and",
-			"adds their {C:chips}chips{} to this Joker",
-			"{C:inactive}(Currently {}{C:chips}+#2#{}{C:inactive} Chips){}",
-			"{C:inactive}(Resets after {}{C:attention}Boss{}{C:inactive} Blind){}"
-		},
 		config = { extra = { chips = 0, max_cards = 5, c_c = 0, alloc = false } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -394,7 +334,7 @@ local jokers = {
 									if card.ability.extra.c_c == card.ability.extra.max_cards and not card.ability.extra.alloc then
 										card.ability.extra.alloc = true
 										card_eval_status_text(card, 'extra', nil, nil, nil, {
-											message = 'Allocated!', colour = G.C.FILTER,
+											message = localize('k_'..BalatrMod.prefix('gc_alloc_ex')), colour = G.C.FILTER,
 											sound = 'tarot2'
 										})
 									end
@@ -412,7 +352,7 @@ local jokers = {
 					card.ability.extra.chips = 0
 					return {
 						colour = G.C.FILTER,
-						message = 'Dumped!',
+						message = localize('k_'..BalatrMod.prefix('gc_dumped_ex')),
 					}
 				end
 			end
@@ -424,10 +364,6 @@ local jokers = {
 	{
 		id = 'fetus',
 		y = 1, x = 3,
-		name = 'Fetus',
-		text = {
-			"{C:chips}+#1#{} measly chip",
-		},
 		config = { extra = { chips = 1, rounds_left = 9 } },
 		loc_vars = function(self, info_queue, card)
 			return { vars = { 
@@ -445,7 +381,7 @@ local jokers = {
 				card.ability.extra.rounds_left = card.ability.extra.rounds_left - 1
 				if card.ability.extra.rounds_left == 1 then
 					return {
-						message = "It's kicking!",
+						message = localize('k_'..BalatrMod.prefix('fetus_kicking')),
 						colour = G.C.SUITS.Hearts,
 						func = function()
 							juice_card_until(card, function(card)
@@ -487,7 +423,18 @@ local jokers = {
 						trigger = 'after', delay = 0.3,
 						func = function()
 							play_sound('tarot2')
-							card:juice_up(0.3, 0.3)
+							card_eval_status_text(card, 'jokers', nil, nil, nil, {
+								message = localize({
+									type='variable',
+									key = 'k_'..BalatrMod.prefix('fetus_born'),
+									vars = {
+										localize {type = 'name_text',
+											key = card.config.center.key,
+											set = card.config.center.set
+										}
+									}}),
+								colour = G.C.SUITS.Hearts, delay = 1.4
+							})
 							return true
 						end
 					}))
@@ -501,26 +448,18 @@ local jokers = {
 	{
 		id = 'bdv',
 		y = 1, x = 6,
-		name = 'PagoMovil',
-		text = {
-			"Go up to {C:red}-$#1#{} in debt",
-			"{C:green}#2# in #3#{} chance to earn",
-			"{C:money}$#4#{} at end of round"
-		},
 		config = { extra = { debt = 10, chance = 10, bonus = 2 } },
 		loc_vars = function(self, info_queue, card)
+			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
 			return { vars = { 
 				card.ability.extra.debt,
-				G.GAME.probabilities.normal,
-				card.ability.extra.chance,
+				a, b,
 				card.ability.extra.bonus,
 			} }
 		end,
 		cost = 15,
-		calculate = function(self, card, context)
-		end,
 		calc_dollar_bonus = function(self, card)
-			if pseudorandom('bdv') < (G.GAME.probabilities.normal / card.ability.extra.chance) then
+			if SMODS.pseudorandom_probability(card, 'bdv', 1, card.ability.extra.chance) then
 				return card.ability.extra.bonus
 			end
 		end,
@@ -536,7 +475,6 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'blank',
-		name = 'Blank',
 		text = {
 			"{C:inactive}Does nothing...?"
 		},
@@ -550,10 +488,6 @@ local jokers = {
 	{
 		id = 'aldi',
 		y = 1, x = 7,
-		name = 'Aldi',
-		text = {
-			"{C:green}#1# in #2#{} chance",
-		},
 		config = { extra = { chance = 25, min = 0, max = 23 } },
 		rarity = 1,
 		cost = 2,
@@ -564,23 +498,35 @@ local jokers = {
                 r_mults[#r_mults+1] = tostring(i)
             end
             local loc_mult = ' '..(localize('k_mult'))..' '
-            local main_start = {
-				{n=G.UIT.T, config={text = 'to give ',colour = G.C.BLACK, scale = 0.32}},
+            local main_start = nil
+			
+			if not card.debuff then main_start = {
                 {n=G.UIT.T, config={text = '+',colour = G.C.MULT, scale = 0.32}},
-                {n=G.UIT.O, config={object = DynaText({string = r_mults, colours = {G.C.RED},pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0})}},
-                {n=G.UIT.O, config={object = DynaText({string = {
+                {n=G.UIT.O, config={colour = G.C.MULT, object = DynaText({string = r_mults, colours = {G.C.MULT}, pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.5, scale = 0.32, min_cycle_time = 0})}},
+                {n=G.UIT.O, config={colour = G.C.MULT, object = DynaText({string = {
                     {string = 'rand()', colour = G.C.JOKER_GREY},{string = "#@"..(G.deck and G.deck.cards[1] and G.deck.cards[#G.deck.cards].base.id or 11)..(G.deck and G.deck.cards[1] and G.deck.cards[#G.deck.cards].base.suit:sub(1,1) or 'D'), colour = G.C.RED},
                     loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult, loc_mult},
                 colours = {G.C.UI.TEXT_DARK},pop_in_rate = 9999999, silent = true, random_element = true, pop_delay = 0.2011, scale = 0.32, min_cycle_time = 0})}},
-            }
+            } end
 			return { vars = { 
-				G.GAME.probabilities.normal,
-				card.ability.extra.chance,
+				SMODS.get_probability_vars(card, 1, card.ability.extra.chance),
 			}, main_end = main_start }
+		end,
+		-- this is JUST so we can put "+??? mult" next to "to give"
+		-- instead of putting it at the bottom. FUCK This game
+		generate_ui = function(_c, info_queue, card, desc_nodes, specific_vars, full_UI_table)
+			local vars = _c.create_fake_card and _c.loc_vars and (_c:loc_vars({}, _c:create_fake_card()) or {})
+			full_UI_table.
+            localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, fixed_scale = 0.63, no_pop_in = true, no_shadow = true, y_offset = 0, no_spacing = true, no_bump = true, vars = (vars.vars) or {colours = {}}}
+			if vars.main_end then
+				local last_line = desc_nodes[#desc_nodes]
+				table.insert(vars.main_end, 1, last_line[1])
+				desc_nodes[#desc_nodes] = vars.main_end
+			end
 		end,
 		calculate = function(self, card, context)
 			if context.joker_main then
-				if pseudorandom('aldi') < (G.GAME.probabilities.normal / card.ability.extra.chance) then
+				if SMODS.pseudorandom_probability(card, 'aldi', 1, card.ability.extra.chance) then
 					local temp_Mult = pseudorandom('misprint', card.ability.extra.min, card.ability.extra.max)
                 	return {
                 	    message = localize{type='variable',key='a_mult',vars={temp_Mult}},
@@ -601,11 +547,6 @@ local jokers = {
 	{
 		id = 'atomic_bomb',
 		y = 1, x = 8,
-		name = 'Atomic Bomb',
-		text = {
-			"{X:"..BalatrMod.prefix('e_chips')..",C:white}^#1#{} Chips and {X:"..BalatrMod.prefix('e_mult')..",C:white}^#2#{} Mult",
-			"{C:red,E:2}self destructs{}"
-		},
 		rarity = 3,
 		cost = 5,
 		config = { extra = { ec = 1000, em = 1000 } },
@@ -695,14 +636,6 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'duke',
-		name = 'Duke',
-		text = {
-			"{s:0.6,C:inactive}he's in my fucking jokers{}",
-			"{X:chips,C:white}X#1#{} Chips if",
-			"{C:attention}Java{} is installed",
-			"{s:0.8,C:inactive}(requires game restart{}",
-			"{s:0.8,C:inactive}if installing){}",
-		},
 		rarity = 2,
 		cost = 3,
 		config = { extra = { x_chips = 3, active = true } },
@@ -733,29 +666,21 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'admin_card',
-		name = 'Admin Card',
 		y = 2, x = 5,
-		text = {
-			"{X:chips,C:white}X#1#{} Chips",
-			"{C:green}#2# in #3#{} chance to instead {C:red}half{}",
-			"your score and add {C:blue}+#4#{} hand",
-			"{C:red,E:2}self destructs{}",
-			"{C:inactive,s:0.75}(only triggers if score > 0){}"
-		},
 		rarity = 2,
 		cost = 3,
 		config = { extra = { x_chips = 5, chance = 5, hands = 1 } },
 		loc_vars = function(self, info_queue, card)
+			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
 			return { vars = { 
 				card.ability.extra.x_chips,
-				G.GAME.probabilities.normal,
-				card.ability.extra.chance,
+				a, b,
 				card.ability.extra.hands,
 			} }
 		end,
 		calculate = function(self, card, context)
 			if context.joker_main then
-				card.ability.extra.gonna_do_it = (pseudorandom('among_us_in_real_life') < (G.GAME.probabilities.normal / card.ability.extra.chance)) and (to_big(G.GAME.chips) > to_big(0))
+				card.ability.extra.gonna_do_it = SMODS.pseudorandom_probability(card, 'among_us_in_real_life', 1, card.ability.extra.chance) and (to_big(G.GAME.chips) > to_big(0))
 				if not card.ability.extra.gonna_do_it then return {
 					x_chips = card.ability.extra.x_chips
 				} end
@@ -782,6 +707,7 @@ local jokers = {
             				    ref_table = G.GAME, ref_value = 'chips',
             				    ease_to = to_big(G.GAME.chips) / to_big(2),
             				    delay = 1,
+								blocking = false,
 								func = function(t) return math.floor(t) end
             				}))
 							card_eval_status_text(card, 'jokers', nil, nil, nil, {
@@ -827,12 +753,7 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'bunny',
-		name = 'Bouncing Bunny',
 		y = 2, x = 6,
-		text = {
-			"{B:2,V:1}#1##2#{} Chips",
-			"{C:inactive}({}{C:"..BalatrMod.prefix('rainbow')..",E:2}Operator{} {C:inactive}changes each round){}"
-		},
 		rarity = 3,
 		cost = 5,
 		-- colors are functionsly Solely because of gradients. i want them to be animated
@@ -941,21 +862,6 @@ local jokers = {
 	{
 		id = 'jimbius',
 		x = 9,
-		name = "{C:mult}Demonic Warrior Jimbius{}",
-		text = {
-			"{C:inactive}(Age: 16) (Personality: Dangerous){}",
-			--"Destroy all other jokers.", --maybe some other time
-			"With each played hand, increase {V:1,E:"..BalatrMod.prefix('shake').."}Blood Fury{}.",
-			"At {V:1,E:"..BalatrMod.prefix('shake').."}#5#{} Blood Fury, gain {C:mult}+#1#{} Mult and a stack",
-			"of {C:"..BalatrMod.prefix('e_mult').."}Nightmare Demon Mode Tokens{}. At {C:"..BalatrMod.prefix('e_mult').."}#6#{}",
-			"Nightmare Demon Mode Tokens {C:inactive}(NDMT){}, gain",
-			"{X:mult,C:white}X#2#{} Mult and activate {C:hearts,E:1}Whirlpool of Destruction{}.",
-			"{C:hearts,E:1}Whirlpool of Destruction{} deletes all cards in your",
-			"hand but adds a {C:dark_edition}Demonic Energy Filter{} to all",
-			"future drawn cards {C:inactive}(during a Blind){}",
-			"{C:inactive}(Currently {}{V:1,E:"..BalatrMod.prefix('shake').."}#3#{}{C:inactive} Blood Fury, {C:"..BalatrMod.prefix('e_mult').."}#4#{} {C:inactive}NDMT){}",
-			"{C:inactive}(Whirlpool: {}{V:2,E:1}#7#{}{C:inactive}){}"
-		},
 		config = { extra = { mult = 999, Xmult = 66, blood_fury = 0, ndmt = 0, hands_fury = 666, ndmt_whirl = 666, whirlpool = false, __whirlpool_message = false } },
 		loc_vars = function(self, info_queue, card)
 			info_queue[#info_queue+1] = G.P_CENTERS['e_'..BalatrMod.prefix('demonic')]
@@ -966,7 +872,7 @@ local jokers = {
 				card.ability.extra.ndmt,
 				card.ability.extra.hands_fury,
 				card.ability.extra.ndmt_whirl,
-				card.ability.extra.whirlpool and 'Active' or 'Inactive',
+				localize(card.ability.extra.whirlpool and 'k_active' or 'k_inactive'),
 				colours = {
 					HEX('990033'),
 					card.ability.extra.whirlpool and G.C.GREEN or G.C.RED
@@ -1091,7 +997,7 @@ local jokers = {
 								end
 							}))
 							card_eval_status_text(card, 'jokers', nil, 1, nil, {
-								message = 'Whirlpool Activated!',
+								message = localize('k_'..BalatrMod.prefix('whirlpool_active')),
 								colour = G.C.SUITS['Hearts'],
 								delay = 2,
 								sound = BalatrMod.prefix("demonic"),
@@ -1121,11 +1027,6 @@ local jokers = {
 		id = 'idk',
 		y = 1, x = 4,
 		soul_pos = {x = 5, y = 1},
-		name = 'IDK',
-		text = {
-			"Adds a {C:"..BalatrMod.prefix('rainbow').."}perma-bonus{}",
-			"to every card scored",
-		},
 		rarity = 4,
 		cost = 10,
 		unlocked = false,
@@ -1182,14 +1083,6 @@ local jokers = {
 		id = 'c_',
 		y = 2, x = 1,
 		soul_pos = {x = 2, y = 2},
-		name = 'c_',
-		text = {
-			"Be able to {C:"..BalatrMod.prefix('rainbow').."}reroll{} cards",
-			"in {C:attention}Booster{} Packs",
-			"{C:inactive}({}{C:red}Discarded{}{C:inactive} cards will be moved",
-			"{C:inactive}to {C:attention}top{}{C:inactive} of the deck and {C:"..BalatrMod.prefix('rainbow').."}new",
-			"{C:inactive}cards will be picked from the {C:attention}bottom{C:inactive})"
-		},
 		rarity = 4,
 		cost = 10,
 		unlocked = false,
@@ -1300,11 +1193,6 @@ local jokers = {
 		id = 'tiny',
 		y = 1, x = 9,
 		soul_pos = {x = 0, y = 2},
-		name = ':tiny:',
-		text = {
-			"Be able to select",
-			"{C:"..BalatrMod.prefix('rainbow').."}+#1#{} more card"
-		},
 		rarity = 4,
 		cost = 10,
 		unlocked = false,
@@ -1334,13 +1222,6 @@ local jokers = {
 	---------------------------------------------------------------------------
 	{
 		id = 'paradise',
-		name = ' ',
-		text = {
-			"{C:green}#1# in #2#{} chance to",
-			"{C:"..BalatrMod.prefix('rainbow').."}purge{} a random Joker",
-			-- it was gonna do playing cards too but that feels like too much
-			"{C:inactive}(Returns in {}{C:attention}#3# {}{C:inactive}rounds){}"
-		},
 		y = 2, x = 3,
 		soul_pos = {x = 4, y = 2},
 		rarity = 4,
@@ -1349,9 +1230,9 @@ local jokers = {
 		config = { extra = { chance = 17, rounds = 3, rounds_left = 3, joker = nil } },
 		loc_vars = function(self, info_queue, card)
 			local center = G.P_CENTERS[card.ability.extra.joker]
+			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
 			return { vars = { 
-				G.GAME.probabilities.normal,
-				card.ability.extra.chance,
+				a, b,
 				card.ability.extra.rounds_left
 			}, main_end = {
                 {n=G.UIT.C, config={align = "bm", minh = 0.4}, nodes={
@@ -1364,8 +1245,7 @@ local jokers = {
 		calculate = function(self, card, context)
 			if not card.ability.extra.joker then
 				if context.after then
-					if pseudorandom('betty be like: "im going to finish oc lore!!!" no you wont bitch 😂😂 Procrastination is coming')
-					< (G.GAME.probabilities.normal / card.ability.extra.chance) then
+					if SMODS.pseudorandom_probability(card, 'betty be like: "im going to finish oc lore!!!" no you wont bitch 😂😂 Procrastination is coming', 1, card.ability.extra.chance) then
 						-- should i check for clones? i dont think it matters
 						local deletable_jokers = {}
         				for k, v in pairs(G.jokers.cards) do
@@ -1383,7 +1263,7 @@ local jokers = {
 
 						if not is_eternal then
 							card_eval_status_text(chosen_joker, 'extra', nil, nil, nil, {
-								message = 'Purged!',
+								message = localize('k_'..BalatrMod.prefix('purged_ex')),
 								colour = G.C.BLACK,
 								sound = 'cancel', delay = 2
 							})
@@ -1507,7 +1387,7 @@ for k, i in ipairs(jokers) do
 		cost = i.cost or 1,
 		rarity = i.rarity or 1,
 		loc_txt = {
-			name = i.name or i.id,
+			
 			text = i.text or {"..."}
 		},
 		loc_vars = i.loc_vars or function(self, info_queue, card)

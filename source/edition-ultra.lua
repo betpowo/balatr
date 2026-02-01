@@ -6,14 +6,7 @@ SMODS.Sound {
 }
 SMODS.Edition {
 	key = "ultra",
-	order = 69,
-    loc_txt = {
-        name =  "Ultra",
-        label = "Ultra",
-        text = {
-            "{X:"..BalatrMod.prefix('e_mult')..",C:white}^#1#{} Mult"
-        }
-    },
+	order = 4,
 	weight = 12,
 	shader = "ultra",
 	in_shop = true,

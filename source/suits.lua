@@ -65,7 +65,7 @@ SMODS.Suit {
 
 SMODS.Booster {
     key = 'booster_blorb',
-    group_key = "k_balatr_booster_group",
+    group_key = "k_"..BalatrMod.prefix("blorb"),
     atlas = 'boosters_balatr', 
     pos = { x = 1, y = 0 },
     discovered = true,
@@ -76,7 +76,6 @@ SMODS.Booster {
             "{C:attention}#2#{} {C:"..BalatrMod.prefix('blorbs').."}Blorb{} cards to",
             "add to your deck",
 		},
-        group_name = "standard",
     },
     
     draw_hand = true,
@@ -87,7 +86,7 @@ SMODS.Booster {
     },
 
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.choose, card.ability.extra } }
+        return { vars = { card.ability.choose, card.ability.extra }, key = BalatrMod.prefix('booster_blorb') }
     end,
 
     weight = 1,
@@ -109,10 +108,6 @@ SMODS.Booster {
 }
 
 local FUCK = {'King', 'Queen', 'Jack'}
-local poop = {
-    ['en-us'] = 'Betopia'
-}
-
 for _, i in ipairs({'Blorbs'}) do
     local first = i:sub(1, 1)
     SMODS.Atlas {
@@ -143,6 +138,6 @@ for _, i in ipairs({'Blorbs'}) do
                 hc_default = true
             }
         },
-        loc_txt = poop
+        loc_txt = 'Betopia'
     }
 end
