@@ -25,7 +25,7 @@ SMODS.Challenge {
 
 SMODS.current_mod.process_loc_text = function()
     -- no lovely patch support wont stop me
-	G.localization.misc.v_text.ch_c_inflation[1] = G.localization.misc.v_text.ch_c_inflation[1]:gsub('$1', '$#1#')
+	G.localization.misc.v_text.ch_c_inflation[1] = G.localization.misc.v_text.ch_c_inflation[1]:gsub('1', '#1#')
 end
 
 SMODS.Challenge {
