@@ -44,7 +44,7 @@ local blinds = {
 			G.hand.config[BalatrMod.prefix('real_high_limit')] = G.hand.config.highlighted_limit
 			G.hand.config.highlighted_limit = #G.hand.cards
     	    for i = 1, #G.hand.cards do
-    	        if SMODS.has_no_rank(G.hand.cards[i]) and (G.hand.cards[i].base.nominal <= 5) then
+    	        if not SMODS.has_no_rank(G.hand.cards[i]) and (G.hand.cards[i].base.nominal <= 5) then
     	            local _selected_card = G.hand.cards[i]
 					table.insert(cards_selected, _selected_card)
     	            G.hand:add_to_highlighted(_selected_card, true)
@@ -69,7 +69,7 @@ local blinds = {
 			if G.GAME.blind.disabled then return false end
     	    local broke = false
     	    for i = 1, #G.play.cards do
-    	        if SMODS.has_no_rank(G.hand.cards[i]) and (G.hand.cards[i].base.nominal <= 5) then
+    	        if not SMODS.has_no_rank(G.play.cards[i]) and (G.play.cards[i].base.nominal <= 5) then
     	            broke = true
     	        end
     	    end
