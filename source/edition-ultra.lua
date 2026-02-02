@@ -1,9 +1,4 @@
 SMODS.Shader({key = 'ultra', path = 'ultra.fs'})
-SMODS.Sound {
-	key = 'ultra',
-	path = 'ultra.ogg',
-	pitch = 1
-}
 SMODS.Edition {
 	key = "ultra",
 	order = 4,

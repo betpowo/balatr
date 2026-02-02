@@ -34,6 +34,12 @@ BalatrMod = {
 		end
 		return G.playing_cards and res
 	end,
+	-- nope sfx
+	nope = function()
+		G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
+            play_sound('tarot2', 0.76, 0.4);return true end}))
+        play_sound('tarot2', 1, 0.4)
+	end,
 	pitch_nudge = 1,
 }
 
@@ -55,11 +61,6 @@ SMODS.Sound {
     key =  "splash_buildup", 
     path = "splash_buildup.ogg",
 	prefix_config = { key = false },
-}
-
-SMODS.Sound {
-    key =  "ultra_fart", 
-    path = "ultra_fart.ogg",
 }
 
 SMODS.Gradient {
@@ -99,6 +100,8 @@ for _, file in ipairs(files) do
 	end
 	f()
 end
+
+SMODS.Sound:register_global()
 
 SMODS.Atlas {
 	key = "modicon",

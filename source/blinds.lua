@@ -56,9 +56,7 @@ local blinds = {
 				play_sound('card1', 1)
 				G.FUNCS.discard_cards_from_highlighted(nil, true)
 
-				G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
-                    play_sound('tarot2', 0.76, 0.4);return true end}))
-                play_sound('tarot2', 1, 0.4)
+				BalatrMod.nope()
 				
 				SMODS.juice_up_blind()
 			end
@@ -187,9 +185,7 @@ local blinds = {
 
 			if (relX <= 1 / 2) and (relY <= 1 / 10) then
 				blind.triggered = true
-				G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
-                    play_sound('tarot2', 0.76, 0.4);return true end}))
-                play_sound('tarot2', 1, 0.4)
+				BalatrMod.nope()
 				
 				SMODS.juice_up_blind()
 				BalatrMod.pitch_nudge = 10

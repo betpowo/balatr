@@ -153,6 +153,14 @@ local localization = {
 			        "{C:red,E:2}self destructs{}",
                 }
             },
+
+            ['j_*_skeleton'] = {
+                name = 'Roaring Skeleton',
+                text = {
+			        "{C:green}#1# in #2#{} chance to give",
+			        "{C:white,X:mult}X#3#{} Mult, {C:attention}#4#{} times",
+                }
+            },
             
             ['j_*_bunny'] = {
                 name = 'Bouncing Bunny',

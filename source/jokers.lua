@@ -159,11 +159,6 @@ local jokers = {
 		post_setup = function(self)
 			-- compatibility with yahimod......i love yahimod
 			self.pools["Cat"] = true
-			SMODS.Sound {
-				key = 'whatsapp',
-				path = 'whatsapp.ogg',
-				pitch = 1
-			}
 		end
 	},
 	---------------------------------------------------------------------------
@@ -516,7 +511,7 @@ local jokers = {
 		-- instead of putting it at the bottom. FUCK This game
 		generate_ui = function(_c, info_queue, card, desc_nodes, specific_vars, full_UI_table)
 			local vars = _c.create_fake_card and _c.loc_vars and (_c:loc_vars({}, _c:create_fake_card()) or {})
-			full_UI_table.
+			full_UI_table.name = localize{type = 'name', set = _c.set, key = _c.key, nodes = full_UI_table.name}
             localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, fixed_scale = 0.63, no_pop_in = true, no_shadow = true, y_offset = 0, no_spacing = true, no_bump = true, vars = (vars.vars) or {colours = {}}}
 			if vars.main_end then
 				local last_line = desc_nodes[#desc_nodes]
@@ -670,6 +665,9 @@ local jokers = {
 		rarity = 2,
 		cost = 3,
 		config = { extra = { x_chips = 5, chance = 5, hands = 1 } },
+		post_setup = function(self)
+			self.eternal_compat = false
+		end,
 		loc_vars = function(self, info_queue, card)
 			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
 			return { vars = { 
@@ -693,9 +691,7 @@ local jokers = {
 							func = function()
 								ease_background_colour{new_colour = lighten(G.C.RED, 0.2), special_colour = darken(G.C.RED, 0.1), contrast = 10}
 								play_sound('chips2')
-								G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
-                				    play_sound('tarot2', 0.76, 0.4);return true end}))
-                				play_sound('tarot2', 1, 0.4)
+								BalatrMod.nope()
 								play_sound(BalatrMod.prefix('impostor_killMusic'))
 								G.HUD:get_UIE_by_ID('chip_UI_count'):juice_up(0.3, 0.1)
 								G.ROOM.jiggle = G.ROOM.jiggle + 4
@@ -740,13 +736,64 @@ local jokers = {
 				end
 			end
 		end,
-		post_setup = function(self)
-			SMODS.Sound {
-				key = 'impostor_killMusic',
-				path = 'impostor_killMusic.ogg',
-				pitch = 1
-			}
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'skeleton',
+		rarity = 2,
+		cost = 3,
+		config = { extra = { chance = 6, xmult = 3, amount = 3 } },
+		loc_vars = function(self, info_queue, card)
+			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
+			return { vars = { 
+				a, b,
+				card.ability.extra.xmult,
+				card.ability.extra.amount,
+			} }
+		end,
+		calculate = function(self, card, context)
+			if context.joker_main and SMODS.pseudorandom_probability(card, 'raaahhh', 1, card.ability.extra.chance) then
+				return {
+					remove_default_message = true,
+					func = function()
+						G.E_MANAGER:add_event(Event({
+							trigger = 'before',
+							delay = 0.2 * G.SETTINGS.GAMESPEED,
+							blocking = true,
+							func = function()
+								play_sound(BalatrMod.prefix('raaar'), 1, 0.7)
+								return true
+							end
+						}))
+						for i = 1, card.ability.extra.amount do
+							local amount = card.ability.extra.xmult
+							local tracked = mult
+							mult = mod_mult(mult * amount)
+							G.E_MANAGER:add_event(Event({
+								trigger = 'before',
+								-- we do this stupid calculation for Consistency with the original sfx
+								delay = 0.6 * G.SETTINGS.GAMESPEED * (G.SETTINGS.GAMESPEED / G.SPEEDFACTOR),
+								blocking = true,
+								func = function()
+									for i = 1, 4 do
+										play_sound('timpani', 0.9 + (math.random() * 0.1))
+									end
+									play_sound('gong', 11.4 / 12, 0.15)
+									tracked = tracked * amount
+									update_hand_text({delay = 0, immediate = true}, {mult = tracked})
+									card_eval_status_text(card, 'x_mult', amount, 1, 'up', {instant = true})
+									--print('BROTHER')
+									return true
+								end
+							}))
+						end
+					end
+				}
+			end
 		end
+
 	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -944,9 +991,7 @@ local jokers = {
 								blockable = true,
 								delay = 1,
 								func = function()
-									G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
-                					    play_sound('tarot2', 0.76, 0.4);return true end}))
-                					play_sound('tarot2', 1, 0.4)
+									BalatrMod.nope()
 									card:juice_up()
 									ease_background_colour{new_colour = G.C.BLACK, contrast = 0}
 									return true

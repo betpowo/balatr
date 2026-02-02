@@ -1,11 +1,7 @@
 BalatrMod.demonic_on_screen = false
 
 SMODS.Shader({key = 'demonic', path = 'demonic.fs'})
-SMODS.Sound {
-	key =  'demonic',
-	path = 'demonic.ogg',
-	pitch = 1
-}
+
 SMODS.Sound {
     key =  "music_evil_balatro", 
     path = "music_evil_balatro.ogg",
