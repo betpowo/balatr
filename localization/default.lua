@@ -87,7 +87,7 @@ local localization = {
 		        text = {
 		        	"Destroys up to {C:attention}#1#{} {C:inactive}(#3#){}",
 			        "{C:red}discarded{} cards per round and",
-			        "adds their {C:chips}chips{} to this Joker",
+			        "adds their {C:chips}Chips{} to this Joker",
 			        "{C:inactive}(Currently {}{C:chips}+#2#{}{C:inactive} Chips){}",
 			        "{C:inactive}(Resets after {}{C:attention}Boss{}{C:inactive} Blind){}"
 		        },
@@ -224,6 +224,65 @@ local localization = {
 			        "{C:inactive}(Returns in {}{C:attention}#3# {}{C:inactive}rounds){}"
                 }
             },
+        },
+        Enhanced = {
+            ['m_*_mint'] = {
+				name = "Mint Card",
+				text = {
+					"{C:white,X:chips}X#1#{} chips"
+				}
+			},
+            ['m_*_cool'] = {
+				name = "Cool Card",
+				text = {
+					"{X:"..BalatrMod.prefix('e_chips')..",C:white}^#1#{} chips"
+				}
+			},
+            ['m_*_hack'] = {
+				name = "Hacked Card",
+				text = {
+                    "{C:purple,E:1}Always scores",
+					"Gives {C:chips}+#1#{} chips",
+                    "if held in hand",
+				}
+			},
+            ['m_*_demo'] = {
+				name = "Demo Card",
+				text = {
+					"{C:chips}+#1#{} extra chips",
+                    "Destroyed after {C:attention}#2#{} uses"
+				}
+			},
+            ['m_*_swap'] = {
+				name = "Swap Card",
+				text = {
+					"Swaps {C:chips}Chips{} and {C:mult}Mult",
+                    "{C:inactive,s:0.4}(how original...)"
+				}
+			},
+            ['m_*_concrete'] = {
+				name = "Concrete Slab",
+				text = {
+					"{C:white,X:mult}X#1#{} Mult",
+                    "if held in hand,",
+                    "otherwise, {C:white,X:chips}X#2#{} chips",
+                    "no rank or suit",
+				}
+			},
+            ['m_*_whatsapp'] = {
+				name = "WhatsApp Card",
+				text = {
+					"{C:purple,E:1}Balances{} {C:chips}Chips{} and {C:mult}Mult",
+                    "no rank or suit",
+				}
+			},
+            ['m_*_star'] = {
+				name = "Glitter Card",
+				text = {
+					"Give a random {C:attention}tag{} when",
+                    "card does {C:attention}not{} score"
+				}
+			},
         },
         Tarot = {
             ['c_*_nebula'] = {
@@ -474,12 +533,17 @@ local localization = {
 
             ['k_inactive'] = 'inactive',
             ['k_*_blorb'] = 'Blorb.',
+
+            ['k_*_swap'] = 'Swap!',
+            ['k_*_trial_ended'] = 'Trial Ended!',
+            ['k_*_tag_ex'] = 'Tag!',
+
             ['k_*_whirlpoop_active'] = 'Whirlpool Activated!',
             ['k_*_gc_alloc_ex'] = 'Allocated!', -- definitely not the correct term for "filling up all the space"
             ['k_*_gc_dumped_ex'] = 'Dumped!',
             ['k_*_fetus_kicking'] = "It's kicking!",
-            
             ['k_*_jackpot_ex'] = 'Jackpot!',
+
             ['k_*_purged_ex'] = 'Purged!',
         }
     }

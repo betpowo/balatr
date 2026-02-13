@@ -133,6 +133,7 @@ SMODS.Challenge {
 	deck = {
 		type = 'Challenge Deck',
 		yes_suits = {[BalatrMod.prefix('B')] = true},
+		no_suits = {S=true,H=true,C=true,D=true,},
 
 		-- in_pool is set to always be false in blorb suit, we have to ad them manually
 		cards = get_blorbs()

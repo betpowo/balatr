@@ -314,28 +314,39 @@ local jokers = {
 				if card.ability.extra.c_c < card.ability.extra.max_cards then
 					local oc = context.other_card
 					local chip_mod =  oc:get_chip_bonus() + ((oc.edition and oc.edition.foil) and 50 or 0)
-					--SMODS.destroy_cards(oc) -- this wont actually remove them for some reason ????
 					card.ability.extra.chips = card.ability.extra.chips + chip_mod
 					card.ability.extra.c_c = card.ability.extra.c_c + 1
+					SMODS.calculate_context({remove_playing_cards = true, removed = {oc}})
 					return {
-						delay = 0.6,
-						remove = true,
-						message = localize { type = 'variable', key = 'a_chips', vars = { chip_mod } },
-						colour = G.C.UI_CHIPS,
 						func = function()
 							G.E_MANAGER:add_event(Event({
+								delay = 1,
 								trigger = 'before',
 								func = function()
-									if card.ability.extra.c_c == card.ability.extra.max_cards and not card.ability.extra.alloc then
+									oc:juice_up(0.3, 0.3)
+                					if SMODS.shatters(oc) then oc:shatter()
+									else oc:start_dissolve() end
+									card_eval_status_text(card, 'extra', nil, nil, nil, {
+										message = localize { type = 'variable', key = 'a_chips', vars = { chip_mod } },
+										colour = G.C.CHIPS,
+										instant = true
+									})
+									return true
+								end
+							}))
+							if card.ability.extra.c_c == card.ability.extra.max_cards and not card.ability.extra.alloc then
+								G.E_MANAGER:add_event(Event({
+									trigger = 'before',
+									func = function()
 										card.ability.extra.alloc = true
 										card_eval_status_text(card, 'extra', nil, nil, nil, {
 											message = localize('k_'..BalatrMod.prefix('gc_alloc_ex')), colour = G.C.FILTER,
 											sound = 'tarot2'
 										})
+										return true
 									end
-									return true
-								end
-							}))
+								}))
+							end
 						end
 					}
 				end
@@ -1248,17 +1259,10 @@ local jokers = {
 			} }
 		end,
 		add_to_deck = function(_, card, from_debuff)
-			-- i hate this game
-			G.hand.config.highlighted_limit = G.hand.config.highlighted_limit + card.ability.extra.cards
-			G.GAME.starting_params.play_limit = G.GAME.starting_params.play_limit + card.ability.extra.cards
-			G.GAME.starting_params.discard_limit = G.GAME.starting_params.discard_limit + card.ability.extra.cards
-			SMODS.update_hand_limit_text(true, true)
+			SMODS.change_play_limit(1); SMODS.change_discard_limit(1);
 		end,
 		remove_from_deck = function(_, card, from_debuff)
-			G.hand.config.highlighted_limit = G.hand.config.highlighted_limit - card.ability.extra.cards
-			G.GAME.starting_params.play_limit = G.GAME.starting_params.play_limit - card.ability.extra.cards
-			G.GAME.starting_params.discard_limit = G.GAME.starting_params.discard_limit - card.ability.extra.cards
-			SMODS.update_hand_limit_text(true, true)
+			SMODS.change_play_limit(-1); SMODS.change_discard_limit(-1);
 		end,
 	},
 

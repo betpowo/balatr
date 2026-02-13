@@ -164,3 +164,77 @@ G.PITCH_MOD = (G.PITCH_MOD or 1)*(1 - dt) + dt*((not G.normal_music_speed and G.
 payload = '''
 * BalatrMod.pitch_nudge
 '''
+
+# concrete slab gimmick
+
+[[patches]]
+[patches.pattern]
+target = "engine/moveable.lua"
+position = "after"
+match_indent = true
+pattern = '''
+major = nil,
+'''
+payload = '''
+move_lerp = 35,
+move_speed = 1,
+max_vel = nil, -- if nil, use G.exp_times.max_vel
+'''
+
+# regex doesnt like me
+[[patches]]
+[patches.pattern]
+target = "engine/moveable.lua"
+position = "after"
+match_indent = true
+pattern = '''
+function Moveable:move_xy(dt)
+'''
+payload = '''
+    local vel = G.exp_times.max_vel
+    G.exp_times.max_vel = self.role.max_vel or vel
+'''
+
+# regex doesnt like me (2)
+[[patches]]
+[patches.pattern]
+target = "engine/moveable.lua"
+position = "before"
+match_indent = true
+pattern = '''
+end
+
+function Moveable:move_scale(dt)
+'''
+payload = '''
+    G.exp_times.max_vel = vel
+'''
+
+[[patches]]
+[patches.regex]
+target = "engine/moveable.lua"
+position = "at"
+line_prepend = ''
+pattern = '''
+[*]35[*]dt
+'''
+payload = '''
+*(self.role.move_lerp or 35)*(dt*(self.role.move_speed or 1))
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/misc_functions.lua"
+position = "after"
+match_indent = true
+pattern = '''
+G.ARGS.ambient_sounds = G.ARGS.ambient_sounds or {
+'''
+payload = '''
+[BalatrMod.prefix('ambientConcrete')] = {
+    volfunc = function(_prev_volume)
+      local target = (BalatrMod.moving_concrete and 1 or 0) * (G.SETTINGS.SOUND.game_sounds_volume / 100)
+      return _prev_volume + (dt * 20) * (target - _prev_volume)
+    end
+},
+'''
