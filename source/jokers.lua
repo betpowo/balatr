@@ -290,6 +290,59 @@ local jokers = {
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
 	{
+		id = '6_the_dollar',
+		rarity = 2,
+		cost = 6,
+		y = 2, x = 8,
+		config = { extra = { money = 6, rank = '6' } },
+		loc_vars = function(self, info_queue, card)
+			return { vars = { 
+				localize(card.ability.extra.rank, 'ranks'),
+				card.ability.extra.money,
+			} }
+		end,
+		calculate = function(self, card, context)
+			if context.individual and context.other_card and context.cardarea == "unscored"
+			and (not SMODS.has_no_rank(context.other_card))
+			and (context.other_card.base.value == card.ability.extra.rank)
+			then
+				--print(localize(context.other_card.base.value, 'ranks')..' of '..localize(context.other_card.base.suit, 'suits_plural')..': '..tostring(context.cardarea))
+				--print(tostring(card.ability.extra.rank)..': '..tostring(context.other_card.base.value == card.ability.extra.rank))
+				return {
+					p_dollars = card.ability.extra.money
+				}
+			end
+			if context.end_of_round and context.game_over == false then
+				local valid_idol_cards = {}
+    			for k, v in ipairs(G.playing_cards) do
+    			    if v.ability.effect ~= 'Stone Card' then
+    			        if not SMODS.has_no_suit(v) and not SMODS.has_no_rank(v) then
+    			            valid_idol_cards[#valid_idol_cards+1] = v
+    			        end
+    			    end
+    			end
+    			if valid_idol_cards[1] then 
+    			    local idol_card = pseudorandom_element(valid_idol_cards, pseudoseed('idol'..G.GAME.round_resets.ante))
+    			    card.ability.extra.rank = idol_card.base.value
+    			    return {
+						message = localize(card.ability.extra.rank, 'ranks')
+					}
+    			end
+			end
+		end,
+		post_setup = function(self)
+			SMODS.Font {
+				key = 'SegoePrint',
+    		    path = "segoeprb.ttf",
+				TEXT_HEIGHT_SCALE = 0.57, 
+        		TEXT_OFFSET = {x=0,y=-65}, 
+    		}
+		end,
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
 		id = 'gc',
 		y = 1, x = 2,
 		config = { extra = { chips = 0, max_cards = 5, c_c = 0, alloc = false } },
@@ -814,7 +867,7 @@ local jokers = {
 		y = 2, x = 6,
 		rarity = 3,
 		cost = 5,
-		-- colors are functionsly Solely because of gradients. i want them to be animated
+		-- colors are functions Solely because of gradients. i want them to be animated
 		available_ops = {
 			["+"] = {
 				key = 'chips',

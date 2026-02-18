@@ -82,6 +82,15 @@ local localization = {
 		        },
             },
 
+            ['j_*_6_the_dollar'] = {
+                name = '{f:'..BalatrMod.prefix('SegoePrint')..'}6. the dollar',
+		        text = {
+		        	"Each {C:purple}unscored {C:attention}#1#{} in",
+                    "played hand gives {C:money}$#2#",
+                    "{C:inactive,s:0.8}(Rank changes at end of round)"
+		        },
+            },
+
             ['j_*_gc'] = {
                 name = 'Garbage Collector',
 		        text = {

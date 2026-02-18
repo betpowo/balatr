@@ -238,7 +238,7 @@ for _, i in ipairs(hands) do
                     "{C:chips}+#4#{} chips",
 		        },
             },
-            config = {hand_type = BalatrMod.prefix(i.id)},
+            config = {hand_type = BalatrMod.prefix(i.id), softlock = h.visible},
             use = function(self, card, area, copier)
     	        SMODS.smart_level_up_hand(card, BalatrMod.prefix(i.id))
     	    end,
