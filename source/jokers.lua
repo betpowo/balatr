@@ -369,10 +369,8 @@ local jokers = {
 					local chip_mod =  oc:get_chip_bonus() + ((oc.edition and oc.edition.foil) and 50 or 0)
 					card.ability.extra.chips = card.ability.extra.chips + chip_mod
 					card.ability.extra.c_c = card.ability.extra.c_c + 1
-					--SMODS.calculate_context({remove_playing_cards = true, removed = {oc}})
 					return {
-						remove = true, -- UUGHHHHH i cant even get it to look right
-						-- because WHY IS REMOVING CARDS NOT WORKING
+						remove = true,
 						[BalatrMod.prefix('remove_anim')] = false,
 						func = function()
 							G.E_MANAGER:add_event(Event({
