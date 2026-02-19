@@ -238,3 +238,54 @@ payload = '''
     end
 },
 '''
+
+# GC BULLSHIT BECAUSE START_DISSOLVE IS NOT AN EVENT
+# SO THEY ALL TRIGGER AT THE SAME TIME MAKING IT FUCKING UGLY
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+position = "after"
+match_indent = true
+pattern = '''
+local removed = false
+'''
+payload = '''
+local balatr_do_manual_anim = false
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+position = "after"
+match_indent = true
+pattern = '''
+if key == 'remove' or (type(eval2) == 'table' and eval2.remove) then removed = true end
+'''
+payload = '''
+if key == BalatrMod.prefix('remove_anim') or (type(eval2) == 'table' and eval2[BalatrMod.prefix('remove_anim')]) then balatr_do_manual_anim = true end
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+position = "after"
+match_indent = true
+pattern = '''
+destroyed_cards[#destroyed_cards + 1] = G.hand.highlighted[i]
+'''
+payload = '''
+if balatr_do_manual_anim then
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+position = "after"
+match_indent = true
+pattern = '''
+G.hand.highlighted[i]:start_dissolve()
+'''
+payload = '''
+end
+'''
