@@ -1374,6 +1374,7 @@ local jokers = {
 						local deletable_jokers = {}
         				for k, v in pairs(G.jokers.cards) do
         				    if not SMODS.is_eternal(v)
+							and not (v.edition and v.edition[BalatrMod.prefix('replica')])
 							and v.config.center.key ~= card.config.center.key -- do not delete itself
 							then deletable_jokers[#deletable_jokers + 1] = v end
         				end
@@ -1406,7 +1407,7 @@ local jokers = {
 									play_sound('tarot2', 1.4)
 									chosen_joker.states.drag.can = false
 									chosen_joker.area:remove_card(chosen_joker)
-									chosen_joker.T.y = chosen_joker.T.y + 4
+									chosen_joker.T.y = chosen_joker.T.y - 4
 									return true
 								end
 							}))
@@ -1438,7 +1439,7 @@ local jokers = {
 						}
 					end
 
-					if G.jokers.config.card_count >= G.jokers.config.card_limits.total_slots then
+					if #G.jokers.cards >= G.jokers.config.card_limit then
 						return {
 							message = localize('k_no_space_ex')
 						}
