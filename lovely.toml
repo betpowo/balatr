@@ -239,6 +239,18 @@ payload = '''
 },
 '''
 
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+position = "after"
+match_indent = true
+pattern = '''
+if self.ability.name == 'Trading Card' and not context.blueprint and 
+'''
+payload = '''
+not SMODS.is_eternal(context.full_hand[1]) and 
+'''
+
 # GC BULLSHIT BECAUSE START_DISSOLVE IS NOT AN EVENT
 # SO THEY ALL TRIGGER AT THE SAME TIME MAKING IT FUCKING UGLY
 
@@ -269,6 +281,55 @@ if key == BalatrMod.prefix('remove_anim') or (type(eval2) == 'table' and eval2[B
 [[patches]]
 [patches.pattern]
 target = "functions/state_events.lua"
+position = "before"
+match_indent = true
+pattern = '''
+G.hand.highlighted[i]:calculate_seal({discard = true})
+'''
+payload = '''
+local ts = G.hand.highlighted[i]
+if SMODS.is_eternal(ts) then
+  G.E_MANAGER:add_event(Event({
+    trigger = 'before',
+    delay = 0.5,
+    func = function()
+      card_eval_status_text(ts, 'extra', nil, nil, nil, {
+	    	message = localize('k_nope_ex'), colour = G.C.ETERNAL, instant = true
+	    })
+      BalatrMod.nope()
+      return true
+    end
+  }))
+  G.E_MANAGER:add_event(Event({
+    trigger = 'before',
+    delay = 0.25,
+    func = function()
+      G.hand:remove_from_highlighted(ts, true)
+      return true
+    end
+  }))
+  goto balatr_continue
+end
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
+position = "before"
+match_indent = true
+pattern = '''
+end
+
+-- context.remove_playing_cards from discard
+if destroyed_cards[1] then
+'''
+payload = '''
+::balatr_continue::
+'''
+
+[[patches]]
+[patches.pattern]
+target = "functions/state_events.lua"
 position = "after"
 match_indent = true
 pattern = '''
@@ -288,4 +349,19 @@ G.hand.highlighted[i]:start_dissolve()
 '''
 payload = '''
 end
+'''
+
+# loading screen
+
+[[patches]]
+[patches.pattern]
+target = "functions/button_callbacks.lua"
+position = "after"
+match_indent = true
+pattern = '''
+G.STAGE_OBJECT_INTERRUPT = true
+'''
+payload = '''
+-- in case youre exiting during The Green
+BalatrMod.green = false
 '''

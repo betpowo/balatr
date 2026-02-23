@@ -323,7 +323,8 @@ local localization = {
 				text = {
 					"Applies {C:dark_edition}Negative{} to",
 			        "{C:attention}#1#{} selected playing card,",
-			        "{C:red}Halves{} your money"
+			        "another random {C:attention}card{} held",
+                    "in hand becomes {C:attention}Eternal",
 				}
 			},
         },
@@ -476,6 +477,13 @@ local localization = {
                     'Card has a {C:'..BalatrMod.prefix('rainbow')..'}perma-bonus{}',
                     'applied by {C:attention}IDK{}',
                     '{s:0.8,C:inactive}(Sticker does nothing on its own)'
+                },
+            },
+            ['*_eternal_playing_card'] = {
+                name = "Eternal",
+                text = {
+                    "Can't be discared",
+                    "or destroyed"
                 },
             },
             ['*_booster_blorb'] = {

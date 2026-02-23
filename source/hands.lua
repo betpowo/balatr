@@ -173,9 +173,18 @@ local hands = {
         evaluate = function(parts, hand)
             if next(hand) then
                 local card_scored = {}
-                local _strush = hand
+                local _strush = {}
+                local __x = -999
+                for k, v in ipairs(hand) do
+                    _strush[(__x < v.T.x) and (#_strush + 1) or 1] = v
+                    __x = v.T.x
+                end
+
                 local shit = 2
                 for j = 1, #_strush do
+                    if SMODS.has_no_rank(_strush[j]) then
+                        goto continue
+                    end
                     local rank = SMODS.Ranks[_strush[j].base.value]
                     if ((shit == 2) and (rank.key == '6')) then
                         shit = shit - 1
@@ -186,6 +195,7 @@ local hands = {
                         table.insert(card_scored, _strush[j])
                     end
                     --print(j, rank.key, shit)
+                    ::continue::
                 end
                 --print(#card_scored)
                 if #card_scored > 1 then return card_scored end

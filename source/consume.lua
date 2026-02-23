@@ -89,41 +89,99 @@ local items = {
 	---------------------------------------------------------------------------
 	{
 		id = 'outcast',
-		y = 2, x = 4, 
+		y = 2, x = 5, 
 		set = 'Spectral',
 		config = {max_highlighted = 1},
 		cost = 4,
 		loc_vars = function(self, info_queue, card)
 			info_queue[#info_queue+1] = {key = 'e_negative_playing_card', set = 'Edition', config = {extra = 1}}
+			info_queue[#info_queue+1] = {key = BalatrMod.prefix('eternal_playing_card'), set = 'Other'}
 			return {vars = {
 				self.config.max_highlighted
 			}}
+		end,
+		can_use = function(self, card)
+			local negatives = {}
+			for k, v in pairs(G.hand.highlighted) do
+				if v.edition and v.edition.negative then
+					table.insert(negatives, v)
+				end
+			end
+			return #G.hand.highlighted > 0 and #negatives < #G.hand.highlighted and #G.hand.highlighted <= self.config.max_highlighted
 		end,
 		use = function(self, card, area)
 			for k, v in pairs(G.hand.highlighted) do
 				v:set_edition('e_negative')
 			end
-			-- hermit
+			local available = {}
+			for k, v in pairs(G.hand.cards) do
+				if not SMODS.is_eternal(v) and (not (v.edition and (v.edition.negative))) then
+					table.insert(available, v)
+				end
+			end
+			if #available > 0 then
+				local chosen = pseudorandom_element(available, 'outcast_eternal')
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.2,
+					func = function()
+						G.hand:unhighlight_all()
+        			    return true
+					end 
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.1,
+					func = function()
+						G.hand:add_to_highlighted(chosen, true)
+        			    return true
+					end 
+				}))
+				G.E_MANAGER:add_event(Event({
+					trigger = 'after',
+					delay = 0.4,
+					func = function()
+        			    card:juice_up(0.3, 0.5)
+						chosen:juice_up(1, 0.5)
+						chosen:add_sticker('eternal', true)
+						play_sound('tarot1', 0.5)
+						play_sound('tarot2', 1.1)
+        			    return true
+					end 
+				}))
+			else
+				card_eval_status_text(card, 'extra', nil, nil, nil, {
+					message = localize('k_nope_ex'),
+					colour = G.C.SECONDARY_SET.Spectral,
+				})
+			end
 			G.E_MANAGER:add_event(Event({
 				trigger = 'after',
-				delay = 0.4,
-				func = function()
-        		    play_sound('timpani')
-        		    card:juice_up(0.3, 0.5)
-        		    ease_dollars(to_big(math.floor(to_big(G.GAME.dollars) / to_big(-2))), true)
-        		    return true
-				end 
-			}))
-			G.E_MANAGER:add_event(Event({
-				trigger = 'after',
-				delay = 0.1,
+				delay = 0.2,
 				func = function()
 					G.hand:unhighlight_all()
         		    return true
 				end 
 			}))
         	delay(0.6)
-		end
+		end,
+		post_setup = function(self)
+			-- cant use is_eternal on playing cards??
+			local og___SMODS_is_eternal = SMODS.is_eternal
+			function SMODS.is_eternal(card, trigger)
+				return og___SMODS_is_eternal(card, trigger) or (card.ability.set ~= 'Joker' and card.ability.eternal)
+			end
+
+			SMODS.Sticker:take_ownership('eternal', {
+				loc_vars = function(self, info_queue, card)
+					return {
+						key = (card and card.config.center.set ~= 'Joker')
+								and BalatrMod.prefix('eternal_playing_card') or 'eternal',
+						set = 'Other'
+					}
+				end
+			})
+		end,
 	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------
@@ -149,7 +207,7 @@ local items = {
 	---------------------------------------------------------------------------
 	{
 		id = 'towel',
-		y = 2, x = 2,
+		y = 2, x = 3,
 		set = 'Tarot',
 		config = {max_highlighted = 2},
 		loc_vars = function(self, info_queue, card)

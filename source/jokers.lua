@@ -264,7 +264,7 @@ local jokers = {
 					ret.func = function()
 						G.E_MANAGER:add_event(Event({
 							func = function()
-								card_eval_status_text(card, 'extra', nil, nil, nil, {
+								card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {
 									message = localize('k_'..BalatrMod.prefix('jackpot_ex')), colour = G.C.GOLD,
 									sound = 'xchips', instant = true, pitch = 2
 								})
@@ -364,6 +364,22 @@ local jokers = {
 				}
 			end
 			if context.discard and context.other_card and not context.blueprint then
+				if SMODS.is_eternal(context.other_card) then
+					return {
+						message = localize('k_nope_ex'),
+						colour = G.C.ETERNAL,
+						func = function()
+							G.E_MANAGER:add_event(Event({
+								delay = 1,
+								trigger = 'before',
+								func = function()
+									context.other_card:juice_up(0.3, 0.3)
+									return true
+								end
+							}))
+						end
+					}
+				end
 				if card.ability.extra.c_c < card.ability.extra.max_cards then
 					local oc = context.other_card
 					local chip_mod =  oc:get_chip_bonus() + ((oc.edition and oc.edition.foil) and 50 or 0)
@@ -379,7 +395,7 @@ local jokers = {
 								func = function()
 									oc:juice_up(0.3, 0.3)
                 					if SMODS.shatters(oc) then oc:shatter()
-									else oc:start_dissolve() end
+									else oc:start_dissolve({darken(G.C.GREEN, 0.75), G.C.GREEN, G.C.GREEN, G.C.WHITE}) end
 									card_eval_status_text(card, 'extra', nil, nil, nil, {
 										message = localize { type = 'variable', key = 'a_chips', vars = { chip_mod } },
 										colour = G.C.CHIPS,
@@ -732,6 +748,7 @@ local jokers = {
 		config = { extra = { x_chips = 5, chance = 5, hands = 1 } },
 		post_setup = function(self)
 			self.eternal_compat = false
+			self.blueprint_compat = false
 		end,
 		loc_vars = function(self, info_queue, card)
 			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
@@ -809,7 +826,7 @@ local jokers = {
 		id = 'skeleton',
 		rarity = 2,
 		cost = 3,
-		config = { extra = { chance = 6, xmult = 3, amount = 3 } },
+		config = { extra = { chance = 4, xmult = 3, amount = 3 } },
 		loc_vars = function(self, info_queue, card)
 			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
 			return { vars = { 
@@ -838,8 +855,8 @@ local jokers = {
 							mult = mod_mult(mult * amount)
 							G.E_MANAGER:add_event(Event({
 								trigger = 'before',
-								-- we do this stupid calculation for Consistency with the original sfx
-								delay = 0.6 * G.SETTINGS.GAMESPEED * (G.SETTINGS.GAMESPEED / G.SPEEDFACTOR),
+								timer = 'REAL',
+								delay = 0.47,
 								blocking = true,
 								func = function()
 									for i = 1, 4 do
@@ -848,7 +865,7 @@ local jokers = {
 									play_sound('gong', 11.4 / 12, 0.15)
 									tracked = tracked * amount
 									update_hand_text({delay = 0, immediate = true}, {mult = tracked})
-									card_eval_status_text(card, 'x_mult', amount, 1, 'up', {instant = true})
+									card_eval_status_text(context.blueprint_card or card, 'x_mult', amount, 1, 'up', {instant = true})
 									--print('BROTHER')
 									return true
 								end
@@ -1092,13 +1109,15 @@ local jokers = {
 									end
 									local destroyed_cards = {}
 									for k, v in pairs(G.hand.cards) do
-										destroyed_cards[#destroyed_cards + 1] = v
-										v:juice_up(0.3, 0.3)
-                						if SMODS.shatters(v) then
-                						    v:shatter()
-                						else
-                						    v:start_dissolve()
-                						end
+										if not SMODS.is_eternal(v) then
+											destroyed_cards[#destroyed_cards + 1] = v
+											v:juice_up(0.3, 0.3)
+                							if SMODS.shatters(v) then
+                							    v:shatter()
+                							else
+                							    v:start_dissolve()
+                							end
+										end
 									end
 									if destroyed_cards[1] then
 										SMODS.calculate_context({remove_playing_cards = true, removed = destroyed_cards})
@@ -1331,6 +1350,8 @@ local jokers = {
 		cost = 17,
 		unlocked = false,
 		config = { extra = { chance = 17, rounds = 3, rounds_left = 3, joker = nil } },
+		blueprint_compat = false,
+		perishable_compat = false,
 		loc_vars = function(self, info_queue, card)
 			local center = G.P_CENTERS[card.ability.extra.joker]
 			local a, b = SMODS.get_probability_vars(card, 1, card.ability.extra.chance)
