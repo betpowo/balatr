@@ -140,26 +140,103 @@ local jokers = {
 	{
 		id = 'gato',
 		x = 4,
-		config = { extra = { chips = 25 } },
+		cost = 3,
+		config = { extra = { new_messages = 0, displayed_messages = 0 } },
 		loc_vars = function(self, info_queue, card)
-			return { vars = { 
-				card.ability.extra.chips,
-			} }
+			card.ability.extra.new_messages = 0
+			card.ability.extra.displayed_messages = 0
+			info_queue[#info_queue + 1] = G.P_CENTERS['m_'..BalatrMod.prefix('whatsapp')]
+			return { vars = { } }
 		end,
-		cost = 2,
+		draw = function(self, card, layer)
+			if card.ability.extra.displayed_messages < 1 then
+				if card.children[BalatrMod.prefix('whatsapp_alert')] then
+					card.children[BalatrMod.prefix('whatsapp_alert')]:remove()
+					card.children[BalatrMod.prefix('whatsapp_alert')] = nil
+				end
+			else
+				if not card.children[BalatrMod.prefix('whatsapp_alert')] then
+					local alert = create_UIBox_card_alert({
+						text = {{
+							ref_table = card.ability.extra,
+							ref_value = 'displayed_messages'
+						}}
+					})
+					card.children[BalatrMod.prefix('whatsapp_alert')] = UIBox {
+            		    definition = alert, 
+            		    config = { align="tri", offset = {x = -0.1, y = 0.1}, parent = card }
+            		}
+				end
+			end
+		end,
 		calculate = function(self, card, context)
-			if context.individual and context.cardarea == G.play and context.other_card and context.other_card:is_suit('Diamonds') then
+			if context.individual and context.cardarea == "unscored"
+			and context.other_card and context.other_card:is_suit('Diamonds')
+			and context.other_card.config.center == G.P_CENTERS['c_base'] then
+				local oc = context.other_card
+				card.ability.extra.new_messages = card.ability.extra.new_messages + 1
+				local scoring_hand = context.scoring_hand
+				local _context = context
 				return {
-					chip_mod = card.ability.extra.chips,
-					message = localize { type = 'variable', key = 'a_chips', vars = { card.ability.extra.chips } },
-					sound = BalatrMod.prefix('whatsapp')
+					func = function()
+						G.E_MANAGER:add_event(Event {
+							trigger = 'before',
+							func = function()
+								card.ability.extra.displayed_messages = card.ability.extra.new_messages
+								oc:juice_up()
+								G.play:add_to_highlighted(oc, true)
+								return true
+							end
+						})
+						card_eval_status_text(context.blueprint_card or card, 'extra', nil, nil, nil, {
+							message = localize {
+								type = 'variable',
+								key = 'k_'..BalatrMod.prefix('new_message'..(card.ability.extra.new_messages == 1 and '' or 's')),
+								vars = { card.ability.extra.new_messages }
+							},
+							colour = G.C.GREEN,
+							sound = BalatrMod.prefix('whatsapp'),
+						})
+						G.E_MANAGER:add_event(Event {
+							delay = 0.1,
+							trigger = 'before',
+							func = function()
+								G.play:remove_from_highlighted(oc)
+								oc:flip()
+								return true
+							end
+						})
+						G.E_MANAGER:add_event(Event {
+							delay = 1,
+							trigger = 'before',
+							func = function()
+								oc:set_ability(G.P_CENTERS['m_'..BalatrMod.prefix('whatsapp')])
+								return true
+							end
+						})
+						G.E_MANAGER:add_event(Event {
+							delay = 0.5,
+							trigger = 'before',
+							func = function()
+								oc:flip()
+								G.play:add_to_highlighted(oc, true)
+								play_sound('tarot2')
+								if scoring_hand then scoring_hand[#scoring_hand + 1] = oc end
+								return true
+							end
+						})
+						
+						-- cannot put inside event
+						-- for calculation reasons
+						SMODS.calculate_individual_effect(context, oc, 'balance')
+					end,
 				}
 			end
 		end,
 		post_setup = function(self)
 			-- compatibility with yahimod......i love yahimod
 			self.pools["Cat"] = true
-		end
+		end,
 	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------

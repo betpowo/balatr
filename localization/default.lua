@@ -43,9 +43,9 @@ local localization = {
             ['j_*_gato'] = {
                 name = 'El Gato Balatro',
 		        text = {
-		        	"{C:chips}+#1#{} Chips",
-			        "for every {C:diamonds}Diamond{} card",
-			        "played, also plays a sound"
+		        	"Enhances every {C:purple}unscored{},",
+                    "unenhanced {C:diamonds}Diamond{} card into",
+                    "a {C:attention}WhatsApp Card",
 		        },
             },
 
@@ -543,6 +543,8 @@ local localization = {
         -- just "dictionary" is for general text, no vars
         v_dictionary = {
             ['k_*_fetus_born'] = "It's a #1#!",
+            ['k_*_new_message'] = '#1# new message',
+            ['k_*_new_messages'] = '#1# new messages',
         },
         dictionary = {
             ['b_balatredible'] = 'Consumable',
