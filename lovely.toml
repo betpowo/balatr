@@ -351,6 +351,18 @@ payload = '''
 end
 '''
 
+[[patches]]
+[patches.pattern]
+target = "card.lua"
+position = "after"
+match_indent = true
+pattern = '''
+local used_tarot = copier or self
+'''
+payload = '''
+SMODS.calculate_context({[BalatrMod.prefix('using_this_consumeable')] = true, card = used_tarot})
+'''
+
 # loading screen
 
 [[patches]]

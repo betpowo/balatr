@@ -181,7 +181,67 @@ local items = {
 					}
 				end
 			})
+
+			SMODS.Sticker:take_ownership('rental', {
+				loc_vars = function(self, info_queue, card)
+					return {
+						vars = { G.GAME.rental_rate or 1 },
+						key = (card and card.config.center.set ~= 'Joker')
+								and (card.ability.consumeable and BalatrMod.prefix('rental_con')
+							or BalatrMod.prefix('rental_playing_card')) or 'rental',
+						set = 'Other'
+					}
+				end,
+				-- TODO: simplify this if
+				calculate = function(self, card, context)
+					if card.config.center.set ~= 'Joker' then
+						if (card.ability.consumeable and context[BalatrMod.prefix('using_this_consumeable')] and context.card == card)
+						or (context.individual and (
+							(context.cardarea ~= 'unscored')
+							or (context.end_of_round and context.cardarea == G.hand)
+						)) then
+							card:calculate_rental()
+							return
+						end
+					end
+        		    if context.end_of_round and not context.repetition and not context.individual then
+        		        card:calculate_rental()
+        		    end
+        		end,
+			})
 		end,
+	},
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	---------------------------------------------------------------------------
+	{
+		id = 'demented',
+		y = 2, x = 4, 
+		set = 'Spectral',
+		config = { max_highlighted = 1 },
+		cost = 4,
+		loc_vars = function(self, info_queue, card)
+			return {vars = {
+				self.config.max_highlighted
+			}}
+		end,
+		can_use = function(self, card)
+			return #G.hand.highlighted > 0 and #G.hand.highlighted <= self.config.max_highlighted and #G.jokers.cards < G.jokers.config.card_limit
+		end,
+		use = function(self, card, area)
+			local highlighted_count = #G.hand.highlighted
+			for i, v in pairs(G.hand.highlighted) do
+				G.E_MANAGER:add_event(Event({
+					trigger = 'before',
+					delay = 0.5,
+					func = function()
+						v:remove_from_deck()
+						draw_card(G.hand, G.jokers, i*100/highlighted_count, 'up', false, v)
+						return true
+					end
+				}))		
+			end
+		end
 	},
 	---------------------------------------------------------------------------
 	---------------------------------------------------------------------------

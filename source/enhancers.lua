@@ -79,12 +79,19 @@ local mods = {
 				if card.ability.uses <= 0 then
 					return {
 						message = localize('k_'..BalatrMod.prefix('trial_ended')),
-						remove = true
+						func = function()
+							SMODS.destroy_cards({card}, true, false)
+						end
 					}
 				end
 				return {
 					message = number_format(card.ability.uses)
 				}
+			end
+			if card.ability.uses <= 0 and context.destroying_card then
+				if context.destroying_card == card then
+					return { remove = true }
+				end
 			end
 		end,
 	},

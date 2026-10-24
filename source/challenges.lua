@@ -52,7 +52,8 @@ SMODS.Challenge {
 local __create_card = create_card
 function create_card(...)
 	local ret = __create_card(...)
-	if G.GAME.modifiers[BalatrMod.prefix('rental_con')] and ret.ability.consumeable and pseudorandom('SAQUENME_DE_VENZUELAAA') < (G.GAME.probabilities.normal / 4) then
+	if G.GAME.modifiers[BalatrMod.prefix('rental_con')]
+	and ret.ability.consumeable and SMODS.pseudorandom_probability(ret, 'SAQUENME_DE_VENZUELAAA', 1, 4) then
 		ret:set_rental(true)
 		ret.ability[BalatrMod.prefix('unusable')] = true
 	end

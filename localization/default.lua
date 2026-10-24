@@ -327,6 +327,13 @@ local localization = {
                     "in hand becomes {C:attention}Eternal",
 				}
 			},
+            ['c_*_demented'] = {
+				name = "Demented",
+				text = {
+					"Move {C:attention}#1#{} selected playing",
+                    "card to a {C:attention}Joker{} slot"
+				}
+			},
         },
         BalatrEdible = {
             ['c_*_food_apple'] = {
@@ -482,8 +489,25 @@ local localization = {
             ['*_eternal_playing_card'] = {
                 name = "Eternal",
                 text = {
-                    "Can't be discared",
+                    "Can't be {C:red}discarded",
                     "or destroyed"
+                },
+            },
+            ['*_rental_con'] = {
+                name = "Rental",
+                text = {
+                    "Lose {C:money}$#1#{} when",
+                    "used, or at",
+                    "end of round",
+                },
+            },
+            ['*_rental_playing_card'] = {
+                name = "Rental",
+                text = {
+                    "Lose {C:money}$#1#{} when",
+                    "played, or if",
+                    "held in hand at",
+                    "end of round",
                 },
             },
             ['*_booster_blorb'] = {
